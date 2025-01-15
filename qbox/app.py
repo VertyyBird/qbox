@@ -5,9 +5,14 @@ from models import User, Question
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '0d6d3f4ceaed1360b61b85b318f40aad'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///qbox.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
