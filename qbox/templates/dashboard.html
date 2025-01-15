@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Dashboard</title>
+</head>
+<body>
+    {% include 'header.html' %}
+    <main>
+        <h2>Unanswered Questions</h2>
+        <ul>
+            {% for question in unanswered_questions %}
+                <li>
+                    <strong>Question:</strong> {{ question.question_text }}<br>
+                    <strong>From:</strong> {% if question.sender_id %}
+                        <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
+                    {% else %}
+                        Anonymous
+                    {% endif %} - {{ question.created_at|time_since }}
+                    <form method="POST" action="{{ url_for('profile', username=current_user.username) }}">
+                        {{ answer_form.hidden_tag() }}
+                        <input type="hidden" name="question_id" value="{{ question.id }}">
+                        <div>
+                            {{ answer_form.answer_text.label }}<br>
+                            {{ answer_form.answer_text(rows=2, cols=50) }}<br>
+                            {% for error in answer_form.answer_text.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            {{ answer_form.submit() }}
+                        </div>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+    {% include 'footer.html' %}
+</body>
+</html>

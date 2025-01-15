@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect, request
 from extensions import db, migrate
-from forms import RegistrationForm, LoginForm, QuestionForm
-from models import User, Question
+from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm
+from models import User, Question, Answer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
@@ -55,6 +55,8 @@ def home():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', username=current_user.username))
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
@@ -72,13 +74,15 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile', username=current_user.username))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user, remember=form.remember.data)
             flash('Login successful!', 'success')
-            return redirect(url_for('home'))
+            return redirect(url_for('profile', username=user.username))
         else:
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', form=form)
@@ -94,15 +98,32 @@ def logout():
 @login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    form = QuestionForm()
-    if form.validate_on_submit():
-        sender_id = None if form.anonymous.data else current_user.id
-        question = Question(sender_id=sender_id, receiver_id=user.id, question_text=form.question_text.data)
+    question_form = QuestionForm()
+    answer_form = AnswerForm()
+    if question_form.validate_on_submit():
+        sender_id = None if question_form.anonymous.data else current_user.id
+        question = Question(sender_id=sender_id, receiver_id=user.id, question_text=question_form.question_text.data)
         db.session.add(question)
         db.session.commit()
         flash('Your question has been submitted!', 'success')
         return redirect(url_for('profile', username=username))
-    return render_template('profile.html', user=user, form=form)
+    if answer_form.validate_on_submit():
+        question_id = request.form.get('question_id')
+        question = Question.query.get(question_id)
+        if question and not question.answers:
+            answer = Answer(question_id=question.id, author_id=current_user.id, answer_text=answer_form.answer_text.data)
+            db.session.add(answer)
+            db.session.commit()
+            flash('Your answer has been submitted!', 'success')
+            return redirect(url_for('profile', username=username))
+    return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form)
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    unanswered_questions = Question.query.filter_by(receiver_id=current_user.id).filter(~Question.answers.any()).all()
+    answer_form = AnswerForm()
+    return render_template('dashboard.html', unanswered_questions=unanswered_questions, answer_form=answer_form)
 
 if __name__ == "__main__":
     app.run(debug=True)

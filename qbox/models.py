@@ -33,6 +33,7 @@ class Question(db.Model):
     question_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_questions')
+    answers = db.relationship('Answer', backref='question', lazy=True)
 
     def __repr__(self):
         return f'<Question {self.id}>'

@@ -8,10 +8,7 @@
     <title>Login</title>
 </head>
 <body>
-    <header>
-        <a href="{{ url_for('home') }}"><h1>Qbox</h1></a>
-        <h2>Login</h2>
-    </header>
+    {% include 'header.html' %}
     <main>
         <form method="POST" action="{{ url_for('login') }}">
             {{ form.hidden_tag() }}
@@ -38,8 +35,6 @@
         </form>
         <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
     </main>
-    <footer>
-        <p>&copy; {{ now().year }} Qbox. All rights reserved.</p>
-    </footer>
+    {% include 'footer.html' %}
 </body>
 </html>

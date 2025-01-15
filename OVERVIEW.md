@@ -7,17 +7,17 @@ Potential Domains: qbox.lol or qbox.social
 ## Key Features
 
 ### 1. User Accounts
-- Sign-up, login, and logout functionality.
-- Password hashing for secure authentication.
-- Unique user pages (e.g., `/users/username`).
+- Sign-up, login, and logout functionality. # DONE
+- Password hashing for secure authentication. # DONE
+- Unique user pages (e.g., `/users/username`). # DONE
 
 ### 2. Question Submission
-- Allow visitors (anonymous or registered users) to submit questions to a specific user's page.
-- Store questions in a database with sender information (if applicable) and timestamps.
+- Allow visitors (anonymous or registered users) to submit questions to a specific user's page. # DONE
+- Store questions in a database with sender information (if applicable) and timestamps. # DONE
 
 ### 3. Answer Management
-- Provide users with a dashboard to review submitted questions.
-- Allow users to write and publish answers to their public page.
+- Provide users with a dashboard to review submitted questions. # DONE
+- Allow users to write and publish answers to their public page. # DONE
 
 ### 4. Database Design
 - Tables for:

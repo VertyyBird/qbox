@@ -1,0 +1,19 @@
+<header>
+    <div class="header-main">
+        <div class="logo-container">
+            <a class="logolink" href="{{ url_for('home') }}"><h1 class="logo">Qbox</h1></a>
+        </div>
+        <nav>
+            <ul>
+                {% if current_user.is_authenticated %}
+                    <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile</a></li>
+                    <li><a class="btn" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a class="btn" href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a class="btn" href="{{ url_for('login') }}">Login</a></li>
+                    <li><a class="btn" href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>

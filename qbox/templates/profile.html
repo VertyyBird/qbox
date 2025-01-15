@@ -7,58 +7,41 @@
     <title>{{ user.username }}'s Profile</title>
 </head>
 <body>
-    <header>
-        <a href="{{ url_for('home') }}"><h1>Qbox</h1></a>
-        <h2>{{ user.username }}'s Profile</h2>
-    </header>
+    {% include 'header.html' %}
     <main>
-        <p>Joined on: {{ user.created_at.strftime('%d %B %Y') }}</p>
-        
-        <h2>Questions Received</h2>
-        <ul>
-            {% for question in user.questions %}
-                <li>
-                    {{ question.question_text }}<br>
-                    Asked -- {{ question.created_at|time_since }}<br>
-                    Asked by: {% if question.sender_id %}
-                        <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
-                    {% else %}
-                        Anonymous
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-
-        <h2>Answers Provided</h2>
-        <ul>
-            {% for answer in user.answers %}
-                <li>
-                    {{ answer.answer_text }}<br>
-                    Answered -- {{ answer.created_at|time_since }}
-                </li>
-            {% endfor %}
-        </ul>
-
+        <div class="subheader">
+            <h2>{{ user.username }}'s Profile</h2>
+            <p>Joined on: {{ user.created_at.strftime('%d %B %Y') }}</p>
+        </div>
         <h2>Submit a Question</h2>
         <form method="POST" action="{{ url_for('profile', username=user.username) }}">
-            {{ form.hidden_tag() }}
+            {{ question_form.hidden_tag() }}
             <div>
-                {{ form.question_text.label }}<br>
-                {{ form.question_text(rows=4, cols=50) }}<br>
-                {% for error in form.question_text.errors %}
+                {{ question_form.question_text.label }}<br>
+                {{ question_form.question_text(rows=4, cols=50) }}<br>
+                {% for error in question_form.question_text.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}
             </div>
             <div>
-                {{ form.anonymous() }} {{ form.anonymous.label }}
+                {{ question_form.anonymous() }} {{ question_form.anonymous.label }}
             </div>
             <div>
-                {{ form.submit() }}
+                {{ question_form.submit() }}
             </div>
         </form>
+
+        <h2>Answered Questions</h2>
+        <ul>
+            {% for answer in user.answers %}
+                <li>
+                    <strong>Question:</strong> {{ answer.question.question_text }}<br>
+                    <strong>Answer:</strong> {{ answer.answer_text }}<br>
+                    Answered: {{ answer.created_at|time_since }}
+                </li>
+            {% endfor %}
+        </ul>
     </main>
-    <footer>
-        <p>&copy; {{ now().year }} Qbox. All rights reserved.</p>
-    </footer>
+    {% include 'footer.html' %}
 </body>
 </html>

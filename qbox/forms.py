@@ -31,3 +31,7 @@ class QuestionForm(FlaskForm):
     question_text = TextAreaField('Your Question', validators=[DataRequired()])
     anonymous = BooleanField('Ask Anonymously')
     submit = SubmitField('Submit')
+
+class AnswerForm(FlaskForm):
+    answer_text = TextAreaField('Your Answer', validators=[DataRequired()])
+    submit = SubmitField('Submit')
