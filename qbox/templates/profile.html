@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>{{ user.username }}'s Profile</title>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('home') }}"><h1>Qbox</h1></a>
+        <h2>{{ user.username }}'s Profile</h2>
+    </header>
+    <main>
+        <p>Joined on: {{ user.created_at.strftime('%d %B %Y') }}</p>
+        
+        <h2>Questions Received</h2>
+        <ul>
+            {% for question in user.questions %}
+                <li>
+                    {{ question.question_text }}<br>
+                    Asked -- {{ question.created_at|time_since }}<br>
+                    Asked by: {% if question.sender_id %}
+                        <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
+                    {% else %}
+                        Anonymous
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Answers Provided</h2>
+        <ul>
+            {% for answer in user.answers %}
+                <li>
+                    {{ answer.answer_text }}<br>
+                    Answered -- {{ answer.created_at|time_since }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Submit a Question</h2>
+        <form method="POST" action="{{ url_for('profile', username=user.username) }}">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.question_text.label }}<br>
+                {{ form.question_text(rows=4, cols=50) }}<br>
+                {% for error in form.question_text.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.anonymous() }} {{ form.anonymous.label }}
+            </div>
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; {{ now().year }} Qbox. All rights reserved.</p>
+    </footer>
+</body>
+</html>
