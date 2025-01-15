@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Dashboard</title>
-</head>
-<body>
-    {% include 'header.html' %}
-    <main>
+{% extends 'base.html' %}
+{% block title %}Dashboard - Qbox{% endblock %}
+{% block og_title %}Dashboard - Qbox{% endblock %}
+{% block og_description %}Manage your unanswered questions on Qbox.{% endblock %}
+{% block og_image %}{{ url_for('static', filename='images/dashboard-og-image.png') }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block content %}
         <h2>Unanswered Questions</h2>
         <ul>
             {% for question in unanswered_questions %}
@@ -36,7 +32,4 @@
                 </li>
             {% endfor %}
         </ul>
-    </main>
-    {% include 'footer.html' %}
-</body>
-</html>
+{% endblock content %}

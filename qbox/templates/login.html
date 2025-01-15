@@ -1,15 +1,10 @@
-<!-- filepath: /e:/Documents/Web/qbox/qbox/templates/login.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Login</title>
-</head>
-<body>
-    {% include 'header.html' %}
-    <main>
+{% extends 'base.html' %}
+{% block title %}Login - Qbox{% endblock %}
+{% block og_title %}Login - Qbox{% endblock %}
+{% block og_description %}Login to your Qbox account to ask and answer questions.{% endblock %}
+{% block og_image %}{{ url_for('static', filename='images/login-og-image.png') }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block content %}
         <form method="POST" action="{{ url_for('login') }}">
             {{ form.hidden_tag() }}
             <div>
@@ -34,7 +29,4 @@
             </div>
         </form>
         <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
-    </main>
-    {% include 'footer.html' %}
-</body>
-</html>
+{% endblock content %}

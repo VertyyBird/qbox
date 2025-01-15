@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Home</title>
-</head>
-<body>
-    {% include 'header.html' %}
-    <main>
+{% extends 'base.html' %}
+{% block title %}Home - Qbox{% endblock title %}
+{% block og_title %}Home - Qbox{% endblock og_title %}
+{% block og_description %}Welcome to Qbox!{% endblock og_description %}
+{% block og_image %}{{ url_for('static', filename='images/home-og-image.png') }}{% endblock og_image %}
+{% block og_type %}website{% endblock og_type %}
+{% block content %}
         <h1>Welcome to Qbox!</h1>
         {% if current_user.is_authenticated %}
             <p>Hello, {{ current_user.username }}!</p>
@@ -16,7 +12,4 @@
         {% else %}
             <p><a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('register') }}">Register</a></p>
         {% endif %}
-    </main>
-    {% include 'footer.html' %}
-</body>
-</html>
+{% endblock content %}

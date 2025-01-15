@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>{{ user.username }}'s Profile</title>
-</head>
-<body>
-    {% include 'header.html' %}
-    <main>
+{% extends 'base.html' %}
+{% block title %}{{ user.username }}'s Profile - Qbox{% endblock %}
+{% block og_title %}{{ user.username }}'s Profile - Qbox{% endblock %}
+{% block og_description %}{{ user.bio or "Ask and answer questions on Qbox" }}{% endblock %}
+{% block og_image %}{{ user.avatar_url or url_for('static', filename='images/default-avatar.png') }}{% endblock %}
+{% block og_type %}profile{% endblock %}
+{% block content %}
         <div class="subheader">
             <h2>{{ user.username }}'s Profile</h2>
             <p>Joined on: {{ user.created_at.strftime('%d %B %Y') }}</p>
@@ -30,7 +26,6 @@
                 {{ question_form.submit() }}
             </div>
         </form>
-
         <h2>Answered Questions</h2>
         <ul>
             {% for answer in user.answers %}
@@ -41,7 +36,4 @@
                 </li>
             {% endfor %}
         </ul>
-    </main>
-    {% include 'footer.html' %}
-</body>
-</html>
+{% endblock content %}
