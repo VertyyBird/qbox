@@ -95,14 +95,14 @@ def logout():
     return redirect(url_for('home'))
 
 @app.route('/profile/<username>', methods=['GET', 'POST'])
-@login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     question_form = QuestionForm()
     answer_form = AnswerForm()
     if question_form.validate_on_submit():
-        sender_id = None if question_form.anonymous.data else current_user.id
-        question = Question(sender_id=sender_id, receiver_id=user.id, question_text=question_form.question_text.data)
+        sender_id = None if not current_user.is_authenticated or question_form.anonymous.data else current_user.id
+        ip_address = request.remote_addr  # Capture the IP address
+        question = Question(sender_id=sender_id, receiver_id=user.id, question_text=question_form.question_text.data, ip_address=ip_address)
         db.session.add(question)
         db.session.commit()
         flash('Your question has been submitted!', 'success')

@@ -28,9 +28,10 @@ class User(db.Model, UserMixin):
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    question_text = db.Column(db.Text, nullable=False)
+    sender_id = db.Column(db.Integer, nullable=True)
+    receiver_id = db.Column(db.Integer, nullable=False)
+    question_text = db.Column(db.String(500), nullable=False)
+    ip_address = db.Column(db.String(45), nullable=False)  # New field for IP address
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_questions')
     answers = db.relationship('Answer', backref='question', lazy=True)

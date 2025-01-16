@@ -20,7 +20,11 @@
                 {% endfor %}
             </div>
             <div>
-                {{ question_form.anonymous() }} {{ question_form.anonymous.label }}
+                {% if not current_user.is_authenticated %}
+                    {{ question_form.anonymous(checked=True, disabled=True) }} {{ question_form.anonymous.label }}
+                {% else %}
+                    {{ question_form.anonymous() }} {{ question_form.anonymous.label }}
+                {% endif %}
             </div>
             <div>
                 {{ question_form.submit() }}
