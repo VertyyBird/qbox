@@ -1,4 +1,3 @@
-# filepath: /e:/Documents/Web/qbox/qbox/models.py
 from datetime import datetime
 from extensions import db  # Import db from extensions
 from flask_login import UserMixin
