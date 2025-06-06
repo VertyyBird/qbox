@@ -15,9 +15,14 @@ Qbox is my attempt at making a Q&A site like CuriousCat. I'm tired of the new Q&
    pip install -r requirements.txt
    ```
 
-3. Run the application:
+3. Generate a secret key for your `.env` file:
+   ```
+   python -c 'import secrets; print(secrets.token_hex(16))'
+   ```
+
+4. Run the application:
    ```
    python app.py
    ```
 
-4. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
+5. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
