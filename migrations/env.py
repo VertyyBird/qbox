@@ -97,6 +97,8 @@ def run_migrations_online():
     connectable = get_engine()
 
     with connectable.connect() as connection:
+        if connection.dialect.name == "sqlite":
+            conf_args["render_as_batch"] = True
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
