@@ -25,12 +25,8 @@ def upgrade():
                type_=sa.String(length=500),
                existing_nullable=False)
 
-<<<<<<< ours
-    op.alter_column('question', 'ip_address', server_default=None)
-=======
     with op.batch_alter_table('question') as batch_op:
         batch_op.alter_column('ip_address', server_default=None)
->>>>>>> theirs
 
     # ### end Alembic commands ###
 
