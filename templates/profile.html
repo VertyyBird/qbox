@@ -34,8 +34,8 @@
         <ul>
             {% for answer in user.answers %}
                 <li>
-                    <strong>Question:</strong> {{ answer.question.question_text }}<br>
-                    <strong>Answer:</strong> {{ answer.answer_text }}<br>
+                    <strong>Question:</strong> {{ answer.question.question_text|replace('\n', '<br>')|safe }}<br>
+                    <strong>Answer:</strong> {{ answer.answer_text|replace('\n', '<br>')|safe }}<br>
                     Answered: {{ answer.created_at|time_since }}
                 </li>
             {% endfor %}

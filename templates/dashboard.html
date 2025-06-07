@@ -11,7 +11,7 @@
         <ul>
             {% for question in unanswered_questions %}
                 <li>
-                    <strong>Question:</strong> {{ question.question_text }}<br>
+                    <strong>Question:</strong> {{ question.question_text|replace('\n', '<br>')|safe }}<br>
                     <strong>From:</strong> {% if question.sender_id %}
                         <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
                     {% else %}
