@@ -5,6 +5,8 @@
 {% block og_image %}{{ url_for('static', filename='images/dashboard-og-image.png') }}{% endblock %}
 {% block og_type %}website{% endblock %}
 {% block content %}
+<div style="display: flex; gap: 40px; align-items: flex-start;">
+    <div style="flex: 2;">
         <h2>Unanswered Questions</h2>
         <ul>
             {% for question in unanswered_questions %}
@@ -32,4 +34,44 @@
                 </li>
             {% endfor %}
         </ul>
+    </div>
+    <div style="flex: 1;">
+        <h2>Account Settings</h2>
+        <form method="POST" action="{{ url_for('dashboard') }}">
+            {{ update_form.hidden_tag() }}
+            <div>
+                {{ update_form.username.label }}<br>
+                {{ update_form.username(size=32) }}<br>
+                {% for error in update_form.username.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ update_form.email.label }}<br>
+                {{ update_form.email(size=32) }}<br>
+                {% for error in update_form.email.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ update_form.password.label }}<br>
+                {{ update_form.password(size=32) }}<br>
+                {% for error in update_form.password.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ update_form.confirm_password.label }}<br>
+                {{ update_form.confirm_password(size=32) }}<br>
+                {% for error in update_form.confirm_password.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ update_form.submit() }}
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock content %}
+

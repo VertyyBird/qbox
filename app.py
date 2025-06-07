@@ -1,6 +1,6 @@
 from flask import Flask, render_template, url_for, flash, redirect, request
 from extensions import db, migrate
-from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm
+from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm
 from models import User, Question, Answer
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -118,12 +118,28 @@ def profile(username):
             return redirect(url_for('profile', username=username))
     return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form)
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     unanswered_questions = Question.query.filter_by(receiver_id=current_user.id).filter(~Question.answers.any()).all()
     answer_form = AnswerForm()
-    return render_template('dashboard.html', unanswered_questions=unanswered_questions, answer_form=answer_form)
+    update_form = UpdateAccountForm()
+
+    if update_form.submit.data and update_form.validate_on_submit():
+        current_user.username = update_form.username.data
+        current_user.email = update_form.email.data
+        if update_form.password.data:
+            current_user.password_hash = generate_password_hash(update_form.password.data)
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'GET':
+        update_form.username.data = current_user.username
+        update_form.email.data = current_user.email
+
+    return render_template('dashboard.html', unanswered_questions=unanswered_questions,
+                           answer_form=answer_form, update_form=update_form)
 
 if __name__ == "__main__":
     app.run(debug=True)
