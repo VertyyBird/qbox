@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Recent Answers - Qbox{% endblock %}
+{% block og_title %}Recent Answers - Qbox{% endblock %}
+{% block og_description %}Latest answered questions on Qbox.{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block content %}
+    <h2>Recently Answered Questions</h2>
+    <ul>
+        {% for answer in answers %}
+            <li>
+                <strong>Question:</strong> {{ answer.question.question_text }}<br>
+                <strong>Answer:</strong> {{ answer.answer_text }}<br>
+                Answered by <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a>
+                - {{ answer.created_at|time_since }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+

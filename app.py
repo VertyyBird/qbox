@@ -53,6 +53,12 @@ def time_since(dt):
 def home():
     return render_template('index.html', current_user=current_user)
 
+@app.route('/feed')
+def feed():
+    """Public feed showing recent answers."""
+    answers = Answer.query.order_by(Answer.created_at.desc()).all()
+    return render_template('feed.html', answers=answers)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
