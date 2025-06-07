@@ -26,3 +26,13 @@ Qbox is my attempt at making a Q&A site like CuriousCat. I'm tired of the new Q&
    ```
 
 5. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
+
+## Template notes
+
+All HTML templates in the `templates` folder extend `base.html`. Because of this, they do not include their own `<!DOCTYPE>` declarations. Running an HTML linter on these individual files may result in warnings about the missing doctype.
+
+To lint the fully rendered pages instead of the raw templates, you can fetch a page from the running development server and pipe it to `tidy`:
+
+```
+curl http://127.0.0.1:5000/ | tidy -config .tidyrc
+```
