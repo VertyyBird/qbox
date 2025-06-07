@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, flash, redirect, request
+from flask import Flask, render_template, url_for, flash, redirect, request, abort
 from extensions import db, migrate
 from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm
 from models import User, Question, Answer
@@ -108,6 +108,8 @@ def profile(username):
         flash('Your question has been submitted!', 'success')
         return redirect(url_for('profile', username=username))
     if answer_form.validate_on_submit():
+        if not current_user.is_authenticated or current_user.id != user.id:
+            abort(403)
         question_id = request.form.get('question_id')
         question = Question.query.get(question_id)
         if question and not question.answers:
