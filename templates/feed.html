@@ -8,8 +8,8 @@
     <ul>
         {% for answer in answers %}
             <li>
-                <strong>Question:</strong> {{ answer.question.question_text|replace('\n', '<br>')|safe }}<br>
-                <strong>Answer:</strong> {{ answer.answer_text|replace('\n', '<br>')|safe }}<br>
+                <strong>Question:</strong> {{ answer.question.question_text|nl2br }}<br>
+                <strong>Answer:</strong> {{ answer.answer_text|nl2br }}<br>
                 Answered by <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a>
                 - {{ answer.created_at|time_since }}
             </li>

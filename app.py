@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, flash, redirect, request, abort
+from markupsafe import Markup, escape
 from extensions import db, migrate
 from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm
 from models import User, Question, Answer
@@ -48,6 +49,14 @@ def time_since(dt):
             return dt.strftime('%I:%M %p %d %b')
         else:
             return dt.strftime('%I:%M %p %d %b %y')
+
+@app.template_filter('nl2br')
+def nl2br(value):
+    """Escape text and convert newlines to ``<br>`` tags."""
+    if value is None:
+        return ''
+    escaped = escape(value)
+    return Markup(escaped.replace('\n', Markup('<br>')))
 
 @app.route('/')
 def home():
