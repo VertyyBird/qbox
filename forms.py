@@ -16,6 +16,7 @@ def _load_allowed_hosts():
     return []
 
 ALLOWED_AVATAR_HOSTS = _load_allowed_hosts()
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -38,9 +39,13 @@ class RegistrationForm(FlaskForm):
 
     def validate_avatar_url(self, avatar_url):
         if avatar_url.data:
-            host = urlparse(avatar_url.data).netloc.lower()
+            parsed = urlparse(avatar_url.data)
+            host = parsed.netloc.lower()
             if not any(host.endswith(h) for h in ALLOWED_AVATAR_HOSTS):
                 raise ValidationError('Avatar URL host not allowed.')
+            path = parsed.path.lower()
+            if not any(path.endswith(ext) for ext in ALLOWED_IMAGE_EXTENSIONS):
+                raise ValidationError('Avatar URL must end with an image file extension.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -81,6 +86,10 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_avatar_url(self, avatar_url):
         if avatar_url.data:
-            host = urlparse(avatar_url.data).netloc.lower()
+            parsed = urlparse(avatar_url.data)
+            host = parsed.netloc.lower()
             if not any(host.endswith(h) for h in ALLOWED_AVATAR_HOSTS):
                 raise ValidationError('Avatar URL host not allowed.')
+            path = parsed.path.lower()
+            if not any(path.endswith(ext) for ext in ALLOWED_IMAGE_EXTENSIONS):
+                raise ValidationError('Avatar URL must end with an image file extension.')

@@ -81,7 +81,7 @@ def test_update_account_info(client):
     login(client, "alice@example.com")
 
     bio_text = "Hello there"
-    avatar = "https://i.imgur.com/test.png"
+    avatar = "https://avatars.githubusercontent.com/u/1.png"
     client.post(
         "/dashboard",
         data={
@@ -101,3 +101,23 @@ def test_update_account_info(client):
     resp = client.get("/profile/alice", follow_redirects=True)
     assert bio_text.encode() in resp.data
     assert avatar.encode() in resp.data
+
+
+def test_avatar_url_requires_image_extension(client):
+    register(client, "eve", "eve@example.com")
+    login(client, "eve@example.com")
+
+    invalid_avatar = "https://avatars.githubusercontent.com/u/1.txt"
+    client.post(
+        "/dashboard",
+        data={
+            "username": "eve",
+            "email": "eve@example.com",
+            "avatar_url": invalid_avatar,
+            "submit": "Update",
+        },
+        follow_redirects=True,
+    )
+
+    user = User.query.filter_by(username="eve").first()
+    assert user.avatar_url is None
