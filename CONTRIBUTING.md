@@ -48,7 +48,7 @@ The server starts in development mode at `http://127.0.0.1:5000/`.
 
 ## Coding style guidelines
 
-- Follow **PEP 8** for Python code with 4‑space indentation.
+- Follow [Pep 8](https://peps.python.org/pep-0008/) for Python code with 4‑space indentation.
 - Keep lines under 79 characters when possible.
 - Use descriptive variable and function names.
 - Format HTML with consistent indentation.
