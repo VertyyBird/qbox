@@ -53,7 +53,9 @@ To lint the fully rendered pages instead of the raw templates, you can fetch a p
 curl http://127.0.0.1:5000/ | tidy -config .tidyrc
 ```
 
-## This project is licensed under the GNU Affero General Public License v3.0.
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0.
 
 You must:
 - Provide the full source code if you distribute or host a modified version.
