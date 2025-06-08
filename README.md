@@ -27,6 +27,16 @@ Qbox is my attempt at making a Q&A site like CuriousCat. I'm tired of the new Q&
 
 5. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
 
+## Running Tests
+
+After installing the dependencies you can run the automated test suite with:
+
+```
+pytest
+```
+
+The tests use Flask's test client and an in-memory SQLite database, so no additional setup is required.
+
 ## Anonymous questions
 
 Logged-in users can toggle **Ask Anonymously** when submitting a question.
