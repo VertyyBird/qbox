@@ -4,6 +4,18 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from urllib.parse import urlparse
 from models import User
 from flask_login import current_user
+from pathlib import Path
+
+CONFIG_DIR = Path(__file__).resolve().parent / "config"
+
+def _load_allowed_hosts():
+    path = CONFIG_DIR / "avatar_hosts.txt"
+    if path.exists():
+        with path.open() as f:
+            return [line.strip() for line in f if line.strip()]
+    return []
+
+ALLOWED_AVATAR_HOSTS = _load_allowed_hosts()
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -27,12 +39,7 @@ class RegistrationForm(FlaskForm):
     def validate_avatar_url(self, avatar_url):
         if avatar_url.data:
             host = urlparse(avatar_url.data).netloc.lower()
-            allowed_hosts = [
-                'imgur.com', 'i.imgur.com', 'ibb.co', 'i.ibb.co',
-                'github.com', 'raw.githubusercontent.com',
-                'avatars.githubusercontent.com', 'user-images.githubusercontent.com',
-            ]
-            if not any(host.endswith(h) for h in allowed_hosts):
+            if not any(host.endswith(h) for h in ALLOWED_AVATAR_HOSTS):
                 raise ValidationError('Avatar URL host not allowed.')
 
 class LoginForm(FlaskForm):
@@ -75,10 +82,5 @@ class UpdateAccountForm(FlaskForm):
     def validate_avatar_url(self, avatar_url):
         if avatar_url.data:
             host = urlparse(avatar_url.data).netloc.lower()
-            allowed_hosts = [
-                'imgur.com', 'i.imgur.com', 'ibb.co', 'i.ibb.co',
-                'github.com', 'raw.githubusercontent.com',
-                'avatars.githubusercontent.com', 'user-images.githubusercontent.com',
-            ]
-            if not any(host.endswith(h) for h in allowed_hosts):
+            if not any(host.endswith(h) for h in ALLOWED_AVATAR_HOSTS):
                 raise ValidationError('Avatar URL host not allowed.')
