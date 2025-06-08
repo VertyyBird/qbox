@@ -76,9 +76,12 @@ def test_answer_flow(client):
     assert answer.author.username == "bob"
 
 
-def test_update_account_info(client):
+def test_update_account_info(client, monkeypatch):
     register(client, "alice", "alice@example.com")
     login(client, "alice@example.com")
+
+    # Ensure avatar URL check passes during this test
+    monkeypatch.setattr("forms._url_is_accessible", lambda url: True)
 
     bio_text = "Hello there"
     avatar = "https://avatars.githubusercontent.com/u/1.png"
@@ -120,4 +123,28 @@ def test_avatar_url_requires_image_extension(client):
     )
 
     user = User.query.filter_by(username="eve").first()
+    assert user.avatar_url is None
+
+
+def test_avatar_url_must_be_accessible(client, monkeypatch):
+    register(client, "tom", "tom@example.com")
+    login(client, "tom@example.com")
+
+    avatar = "https://avatars.githubusercontent.com/u/2.png"
+
+    # Simulate inaccessible avatar URL
+    monkeypatch.setattr("forms._url_is_accessible", lambda url: False)
+
+    client.post(
+        "/dashboard",
+        data={
+            "username": "tom",
+            "email": "tom@example.com",
+            "avatar_url": avatar,
+            "submit": "Update",
+        },
+        follow_redirects=True,
+    )
+
+    user = User.query.filter_by(username="tom").first()
     assert user.avatar_url is None

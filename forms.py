@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from urllib.parse import urlparse
+from urllib.request import Request, build_opener, HTTPRedirectHandler, URLError
+from urllib.error import HTTPError
 from models import User
 from flask_login import current_user
 from pathlib import Path
@@ -17,6 +19,31 @@ def _load_allowed_hosts():
 
 ALLOWED_AVATAR_HOSTS = _load_allowed_hosts()
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+
+
+def _url_is_accessible(url: str) -> bool:
+    """Return True if the url responds with a successful non-redirect status."""
+    class _NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+        def http_error_302(self, req, fp, code, msg, headers):
+            raise HTTPError(req.full_url, code, msg, headers, fp)
+
+        http_error_301 = http_error_302
+        http_error_303 = http_error_302
+        http_error_307 = http_error_302
+        http_error_308 = http_error_302
+
+    opener = build_opener(_NoRedirect())
+    request = Request(url, method="HEAD")
+    try:
+        with opener.open(request, timeout=5) as resp:
+            return 200 <= resp.status < 300
+    except HTTPError as e:
+        return False
+    except URLError:
+        return False
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -46,6 +73,8 @@ class RegistrationForm(FlaskForm):
             path = parsed.path.lower()
             if not any(path.endswith(ext) for ext in ALLOWED_IMAGE_EXTENSIONS):
                 raise ValidationError('Avatar URL must end with an image file extension.')
+            if not _url_is_accessible(avatar_url.data):
+                raise ValidationError('Avatar URL is not accessible or redirects.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -93,3 +122,6 @@ class UpdateAccountForm(FlaskForm):
             path = parsed.path.lower()
             if not any(path.endswith(ext) for ext in ALLOWED_IMAGE_EXTENSIONS):
                 raise ValidationError('Avatar URL must end with an image file extension.')
+            if not _url_is_accessible(avatar_url.data):
+                raise ValidationError("Avatar URL is not accessible or redirects.")
+
