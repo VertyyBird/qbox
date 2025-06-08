@@ -12,11 +12,13 @@
             {% for question in unanswered_questions %}
                 <li>
                     <strong>Question:</strong> {{ question.question_text|nl2br }}<br>
-                    <strong>From:</strong> {% if question.sender_id %}
+                    <strong>From:</strong>
+                    {% if question.sender_id and not question.is_anonymous %}
                         <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
                     {% else %}
                         Anonymous
-                    {% endif %} - {{ question.created_at|time_since }}
+                    {% endif %}
+                    - {{ question.created_at|time_since }}
                     <form method="POST" action="{{ url_for('profile', username=current_user.username) }}">
                         {{ answer_form.hidden_tag() }}
                         <input type="hidden" name="question_id" value="{{ question.id }}">

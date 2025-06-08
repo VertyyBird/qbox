@@ -115,9 +115,20 @@ def profile(username):
     question_form = QuestionForm()
     answer_form = AnswerForm()
     if question_form.validate_on_submit():
-        sender_id = None if not current_user.is_authenticated or question_form.anonymous.data else current_user.id
+        if current_user.is_authenticated:
+            sender_id = current_user.id
+            is_anonymous = question_form.anonymous.data
+        else:
+            sender_id = None
+            is_anonymous = True
         ip_address = request.remote_addr  # Capture the IP address
-        question = Question(sender_id=sender_id, receiver_id=user.id, question_text=question_form.question_text.data, ip_address=ip_address)
+        question = Question(
+            sender_id=sender_id,
+            receiver_id=user.id,
+            is_anonymous=is_anonymous,
+            question_text=question_form.question_text.data,
+            ip_address=ip_address,
+        )
         db.session.add(question)
         db.session.commit()
         flash('Your question has been submitted!', 'success')

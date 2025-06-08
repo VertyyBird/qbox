@@ -27,6 +27,12 @@ Qbox is my attempt at making a Q&A site like CuriousCat. I'm tired of the new Q&
 
 5. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
 
+## Anonymous questions
+
+Logged-in users can toggle **Ask Anonymously** when submitting a question.
+The site records who asked the question for moderation but hides the
+sender's identity from other users.
+
 ## Template notes
 
 All HTML templates in the `templates` folder extend `base.html`. Because of this, they do not include their own `<!DOCTYPE>` declarations. Running an HTML linter on these individual files may result in warnings about the missing doctype.

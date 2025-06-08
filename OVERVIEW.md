@@ -22,7 +22,8 @@ Potential Domains: qbox.lol or qbox.social
 ### 4. Database Design
 - Tables for:
   - **Users**: ID, username, email, hashed password, created_at.
-  - **Questions**: ID, sender ID (nullable for anonymous), receiver ID, question text, created_at.
+  - **Questions**: ID, sender ID (nullable for guests), receiver ID,
+    question text, **is_anonymous** flag, created_at.
   - **Answers**: ID, question ID, answer text, created_at.
 
 ### 5. Basic UI
@@ -36,7 +37,7 @@ Potential Domains: qbox.lol or qbox.social
 
 ### 6. Stretch Goals
 - [ ] Notifications for new questions.
-- [ ] Anonymous question submission toggle.
+- [x] Anonymous question submission toggle.
 - [ ] Page themes/customization for user profiles.
 
 ## Technical Stack
