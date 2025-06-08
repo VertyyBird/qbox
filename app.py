@@ -76,7 +76,13 @@ def register():
     if form.validate_on_submit():
         try:
             hashed_password = generate_password_hash(form.password.data)
-            user = User(username=form.username.data, email=form.email.data, password_hash=hashed_password)
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                password_hash=hashed_password,
+                bio=form.bio.data,
+                avatar_url=form.avatar_url.data,
+            )
             db.session.add(user)
             db.session.commit()
             flash('Your account has been created!', 'success')
@@ -163,6 +169,8 @@ def dashboard():
     if update_form.submit.data and update_form.validate_on_submit():
         current_user.username = update_form.username.data
         current_user.email = update_form.email.data
+        current_user.bio = update_form.bio.data
+        current_user.avatar_url = update_form.avatar_url.data
         if update_form.password.data:
             current_user.password_hash = generate_password_hash(update_form.password.data)
         db.session.commit()
@@ -172,6 +180,8 @@ def dashboard():
     if request.method == 'GET':
         update_form.username.data = current_user.username
         update_form.email.data = current_user.email
+        update_form.bio.data = current_user.bio
+        update_form.avatar_url.data = current_user.avatar_url
 
     return render_template('dashboard.html', unanswered_questions=unanswered_questions,
                            answer_form=answer_form, update_form=update_form)

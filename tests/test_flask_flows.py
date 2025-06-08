@@ -74,3 +74,30 @@ def test_answer_flow(client):
     assert answer is not None
     assert answer.question_id == question.id
     assert answer.author.username == "bob"
+
+
+def test_update_account_info(client):
+    register(client, "alice", "alice@example.com")
+    login(client, "alice@example.com")
+
+    bio_text = "Hello there"
+    avatar = "https://i.imgur.com/test.png"
+    client.post(
+        "/dashboard",
+        data={
+            "username": "alice",
+            "email": "alice@example.com",
+            "bio": bio_text,
+            "avatar_url": avatar,
+            "submit": "Update",
+        },
+        follow_redirects=True,
+    )
+
+    user = User.query.filter_by(username="alice").first()
+    assert user.bio == bio_text
+    assert user.avatar_url == avatar
+
+    resp = client.get("/profile/alice", follow_redirects=True)
+    assert bio_text.encode() in resp.data
+    assert avatar.encode() in resp.data

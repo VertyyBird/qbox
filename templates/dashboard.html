@@ -56,6 +56,20 @@
                 {% endfor %}
             </div>
             <div>
+                {{ update_form.bio.label }}<br>
+                {{ update_form.bio(rows=3, cols=32) }}<br>
+                {% for error in update_form.bio.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ update_form.avatar_url.label }}<br>
+                {{ update_form.avatar_url(size=32) }}<br>
+                {% for error in update_form.avatar_url.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
                 {{ update_form.password.label }}<br>
                 {{ update_form.password(size=32) }}<br>
                 {% for error in update_form.password.errors %}

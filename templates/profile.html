@@ -8,6 +8,12 @@
         <div class="subheader">
             <h2>{{ user.username }}'s Profile</h2>
             <p>Joined on: {{ user.created_at.strftime('%d %B %Y') }}</p>
+            <div>
+                <img src="{{ user.avatar_url or url_for('static', filename='images/default-avatar.png') }}" alt="avatar" width="100">
+            </div>
+            {% if user.bio %}
+            <p>{{ user.bio|nl2br }}</p>
+            {% endif %}
         </div>
         <h2>Submit a Question</h2>
         <form method="POST" action="{{ url_for('profile', username=user.username) }}">

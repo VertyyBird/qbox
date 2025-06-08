@@ -22,6 +22,20 @@
                 {% endfor %}
             </div>
             <div>
+                {{ form.bio.label }}<br>
+                {{ form.bio(rows=3, cols=32) }}<br>
+                {% for error in form.bio.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.avatar_url.label }}<br>
+                {{ form.avatar_url(size=32) }}<br>
+                {% for error in form.avatar_url.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </div>
+            <div>
                 {{ form.password.label }}<br>
                 {{ form.password(size=32) }}<br>
                 {% for error in form.password.errors %}
