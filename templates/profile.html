@@ -32,7 +32,7 @@
         </form>
         <h2>Answered Questions</h2>
         <ul>
-            {% for answer in user.answers %}
+            {% for answer in answers %}
                 <li>
                     <strong>Question:</strong> {{ answer.question.question_text|nl2br }}<br>
                     <strong>Answer:</strong> {{ answer.answer_text|nl2br }}<br>

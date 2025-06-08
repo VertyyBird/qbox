@@ -144,12 +144,19 @@ def profile(username):
             db.session.commit()
             flash('Your answer has been submitted!', 'success')
             return redirect(url_for('profile', username=username))
-    return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form)
+    answers = Answer.query.filter_by(author_id=user.id).order_by(Answer.created_at.desc()).all()
+    return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form, answers=answers)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    unanswered_questions = Question.query.filter_by(receiver_id=current_user.id).filter(~Question.answers.any()).all()
+    unanswered_questions = (
+        Question.query
+        .filter_by(receiver_id=current_user.id)
+        .filter(~Question.answers.any())
+        .order_by(Question.created_at.desc())
+        .all()
+    )
     answer_form = AnswerForm()
     update_form = UpdateAccountForm()
 
