@@ -19,15 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 {% extends 'base.html' %}
 {% block title %}Home - Qbox{% endblock title %}
 {% block og_title %}Home - Qbox{% endblock og_title %}
-{% block og_description %}Welcome to Qbox!{% endblock og_description %}
+{% block og_description %}A simple Q&A site you can use right in your browser.{% endblock og_description %}
 {% block og_image %}{{ url_for('static', filename='images/home-og-image.png') }}{% endblock og_image %}
 {% block og_type %}website{% endblock og_type %}
 {% block content %}
-        <h1>Welcome to Qbox!</h1>
-        {% if current_user.is_authenticated %}
-            <p>Hello, {{ current_user.username }}!</p>
-            <p><a href="{{ url_for('logout') }}">Logout</a></p>
-        {% else %}
-            <p><a href="{{ url_for('login') }}">Login</a> | <a href="{{ url_for('register') }}">Register</a></p>
-        {% endif %}
+        <h1 class="centered">Welcome to Qbox!</h1>
+        <p class="centered">Qbox lets you send questions to anyone and share your answers publicly.</P>
+        <p class="centered">There's no app to install! Everything happens here in your web browser.</p>
 {% endblock content %}
