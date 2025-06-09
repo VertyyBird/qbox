@@ -164,3 +164,51 @@ def test_avatar_url_must_be_accessible(client, monkeypatch):
 
     user = User.query.filter_by(username="tom").first()
     assert user.avatar_url is None
+
+
+def test_feed_order_and_content(client):
+    """Feed should show recent answers in reverse order with question text and author link."""
+    # Register two users
+    register(client, "alice", "alice@example.com")
+    register(client, "bob", "bob@example.com")
+
+    # Alice asks Bob two questions
+    login(client, "alice@example.com")
+    client.post(
+        "/profile/bob",
+        data={"question_text": "First?", "anonymous": "y"},
+        follow_redirects=True,
+    )
+    client.post(
+        "/profile/bob",
+        data={"question_text": "Second?", "anonymous": "y"},
+        follow_redirects=True,
+    )
+    client.get("/logout", follow_redirects=True)
+
+    # Bob answers the questions in order
+    login(client, "bob@example.com")
+    questions = Question.query.order_by(Question.created_at).all()
+    client.post(
+        "/profile/bob",
+        data={"question_id": questions[0].id, "answer_text": "A1"},
+        follow_redirects=True,
+    )
+    client.post(
+        "/profile/bob",
+        data={"question_id": questions[1].id, "answer_text": "A2"},
+        follow_redirects=True,
+    )
+
+    # Fetch the public feed
+    resp = client.get("/feed")
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+
+    # Ensure questions and author link are present
+    assert "First?" in html
+    assert "Second?" in html
+    assert "/profile/bob" in html
+
+    # Answers should be in reverse chronological order (A2 before A1)
+    assert html.index("Second?") < html.index("First?")
