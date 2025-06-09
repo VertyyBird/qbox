@@ -64,3 +64,5 @@ You must:
 
 Full licence: [https://www.gnu.org/licenses/agpl-3.0.html](https://www.gnu.org/licenses/agpl-3.0.html)
 
+
+When adding new source files, include the AGPLv3 notice at the top of each file.
