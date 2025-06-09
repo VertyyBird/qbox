@@ -202,5 +202,10 @@ def dashboard():
     return render_template('dashboard.html', unanswered_questions=unanswered_questions,
                            answer_form=answer_form, update_form=update_form)
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 if __name__ == "__main__":
     app.run(debug=True)

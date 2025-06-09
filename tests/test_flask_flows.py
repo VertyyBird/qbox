@@ -212,3 +212,9 @@ def test_feed_order_and_content(client):
 
     # Answers should be in reverse chronological order (A2 before A1)
     assert html.index("Second?") < html.index("First?")
+
+
+def test_custom_404(client):
+    resp = client.get('/nonexistent')
+    assert resp.status_code == 404
+    assert b"Oops! Page Not Found" in resp.data
