@@ -154,6 +154,16 @@ footer {
     flex-shrink: 0;
 }
 
+footer a {
+    color: #cfe4ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
 .centered {
     margin-left: auto;
     margin-right: auto;
