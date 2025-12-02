@@ -10,6 +10,7 @@
 - Configure secrets in `.env` (at minimum `SECRET_KEY`).
 - Run the app locally: `python app.py` then visit `http://127.0.0.1:5000/`.
 - Apply migrations when the schema changes: `FLASK_APP=app.py flask db upgrade` (use `flask db migrate -m "msg"` to generate revisions).
+- Do not delete/recreate the DB when models change; generate a migration, upgrade locally, and call this out in summaries so others run `flask db upgrade` after pulling.
 - Run tests: `pytest` (uses in-memory SQLite and disables CSRF via the `client` fixture).
 
 ## Coding Style & Naming Conventions
