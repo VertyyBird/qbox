@@ -23,7 +23,7 @@ from urllib.request import Request, URLError, build_opener
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField, HiddenField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional
 
 from models import User
 
@@ -211,7 +211,7 @@ class AnswerReportForm(FlaskForm):
 
 
 class BlockForm(FlaskForm):
-    user_id = HiddenField()
+    user_id = StringField('User ID', validators=[Optional()])
     ip_address = StringField('IP Address')
     reason = TextAreaField('Reason')
     hours = StringField('Expires in hours')

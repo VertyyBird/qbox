@@ -422,8 +422,15 @@ def create_block():
             expires_at = utcnow() + timedelta(hours=hours)
         except ValueError:
             pass
+    user_id = None
+    if form.user_id.data:
+        try:
+            user_id = int(form.user_id.data)
+        except ValueError:
+            flash('User ID must be a number.', 'danger')
+            return redirect(url_for('admin_panel'))
     block = Block(
-        user_id=form.user_id.data or None,
+        user_id=user_id,
         ip_address=form.ip_address.data or None,
         reason=form.reason.data,
         expires_at=expires_at,
