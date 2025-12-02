@@ -56,33 +56,42 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <h3>Answer Reports</h3>
     <ul class="card-list">
         {% for report in answer_reports %}
+            {% set answer = answers_by_id.get(report.answer_id) %}
             <li class="card">
                 <div class="card-header">
-                    <div><a href="{{ url_for('answer_permalink', username=report.answer.author.username, public_id=report.answer.public_id) }}">View answer</a></div>
-                    <div class="card-meta">{{ report.created_at|time_since }}</div>
+                    <div>
+                        {% if answer %}
+                            <strong>Answer by</strong> {{ answer.author.username }} (ID {{ answer.author_id }})
+                        {% else %}
+                            <strong>Answer removed</strong>
+                        {% endif %}
+                    </div>
+                    <div class="card-meta">{{ report.report_count }} report(s)</div>
                 </div>
-                <p>{{ report.reason or 'No reason provided.' }}</p>
+                {% if answer %}
+                <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
+                <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
+                {% endif %}
                 <div style="display:flex; gap:8px; flex-wrap: wrap;">
-                    <form method="POST" action="{{ url_for('resolve_report', report_id=report.id) }}">
+                    <form method="POST" action="{{ url_for('resolve_report', report_id=report.answer_id) }}">
                         {{ block_form.csrf_token }}
                         <button type="submit">Ignore / Resolve</button>
                     </form>
+                    {% if answer %}
                     <form method="POST" action="{{ url_for('create_block') }}">
                         {{ block_form.csrf_token }}
-                        <input type="hidden" name="user_id" value="{{ report.answer.author.id }}">
+                        <input type="hidden" name="user_id" value="{{ answer.author.id }}">
                         <input type="hidden" name="reason" value="Blocked after reported answer">
                         <input type="hidden" name="hours" value="">
                         <button type="submit">Block Author</button>
                     </form>
-                    <form method="POST" action="{{ url_for('deactivate_block', block_id=report.answer.author.id) }}" onsubmit="return false;">
-                        <!-- placeholder; deactivation handled in block list -->
-                    </form>
-                    <form method="POST" action="{{ url_for('moderate_question', question_id=report.answer.question.id) }}">
+                    <form method="POST" action="{{ url_for('moderate_question', question_id=answer.question.id) }}">
                         {{ block_form.csrf_token }}
-                        <input type="hidden" name="question_id" value="{{ report.answer.question.id }}">
+                        <input type="hidden" name="question_id" value="{{ answer.question.id }}">
                         <input type="hidden" name="action" value="hide">
                         <button type="submit">Hide Question</button>
                     </form>
+                    {% endif %}
                 </div>
             </li>
         {% else %}

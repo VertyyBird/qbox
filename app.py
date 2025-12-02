@@ -394,12 +394,26 @@ def admin_panel():
             alerts.append(f'IP {ip} has {count} flagged questions.')
 
     flagged_questions = Question.query.filter_by(is_flagged=True).order_by(Question.created_at.desc()).all()
-    answer_reports = AnswerReport.query.filter_by(resolved=False).order_by(AnswerReport.created_at.desc()).all()
+    answer_reports = (
+        db.session.query(
+            Answer.id.label('answer_id'),
+            db.func.count(AnswerReport.id).label('report_count'),
+            db.func.max(AnswerReport.created_at).label('latest_report'),
+        )
+        .join(AnswerReport, Answer.id == AnswerReport.answer_id)
+        .filter(AnswerReport.resolved.is_(False))
+        .group_by(Answer.id)
+        .order_by(db.func.max(AnswerReport.created_at).desc())
+        .all()
+    )
     blocks = Block.query.order_by(Block.created_at.desc()).all()
 
+    # Fetch answer objects for grouped reports
+    answers_by_id = {a.id: a for a in Answer.query.filter(Answer.id.in_([r.answer_id for r in answer_reports])).all()}
+
     return render_template('admin.html', flagged_questions=flagged_questions,
-                           answer_reports=answer_reports, blocks=blocks,
-                           alerts=alerts, block_form=block_form)
+                           answer_reports=answer_reports, answers_by_id=answers_by_id,
+                           blocks=blocks, alerts=alerts, block_form=block_form)
 
 @app.route('/admin/reports/<int:report_id>/resolve', methods=['POST'])
 def resolve_report(report_id):
