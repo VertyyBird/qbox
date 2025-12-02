@@ -216,3 +216,9 @@ footer {
     font-size: 0.9em;
     text-align: right;
 }
+
+.bulleted {
+    padding-left: 20px;
+    list-style: disc;
+    margin: 0 0 12px;
+}

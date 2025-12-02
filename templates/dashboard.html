@@ -98,7 +98,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    {{ update_form.avatar_url.label }}
+                    {{ update_form.avatar_url.label }} (<a href="{{ url_for('faq') }}#avatar-rules" target="_blank" rel="noopener">avatar rules</a>)
                     {{ update_form.avatar_url(size=32, class_="form-control") }}
                     {% for error in update_form.avatar_url.errors %}
                         <span style="color: red;">[{{ error }}]</span>

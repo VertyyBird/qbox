@@ -47,7 +47,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 {% endfor %}
             </div>
             <div>
-                {{ form.avatar_url.label }}<br>
+                {{ form.avatar_url.label }} (<a href="{{ url_for('faq') }}#avatar-rules" target="_blank" rel="noopener">avatar rules</a>)<br>
                 {{ form.avatar_url(size=32) }}<br>
                 {% for error in form.avatar_url.errors %}
                     <span style="color: red;">[{{ error }}]</span>

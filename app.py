@@ -117,6 +117,10 @@ def answer_permalink(username, public_id):
     answer = Answer.query.filter_by(public_id=public_id, author_id=user.id).first_or_404()
     return render_template('answer.html', user=user, answer=answer)
 
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:

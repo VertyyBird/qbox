@@ -1,0 +1,43 @@
+{#
+Qbox, a Q&A website
+Copyright (C) 2025  Rhys Baker
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% extends 'base.html' %}
+{% block title %}FAQ - Qbox{% endblock %}
+{% block og_title %}FAQ - Qbox{% endblock %}
+{% block og_description %}Answers to common questions about Qbox.{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block content %}
+<div class="content-section">
+    <h1>Frequently Asked Questions</h1>
+</div>
+
+<div class="content-section">
+    <div class="card" id="avatar-rules">
+        <div class="card-header">
+            <div><strong>How do avatar URLs work?</strong></div>
+        </div>
+        <p>Avatar URLs must meet the following requirements:</p>
+        <ul class="bulleted">
+            <li>Host must be on the allowlist: <code>ibb.co</code>, <code>i.ibb.co</code>, <code>github.com</code>, <code>raw.githubusercontent.com</code>, <code>avatars.githubusercontent.com</code>, <code>user-images.githubusercontent.com</code>.</li>
+            <li>File extension must end with <code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.gif</code>, or <code>.webp</code>.</li>
+            <li>The URL must be accessible and respond with a successful status (we check with a quick HEAD/GET request and follow a single redirect).</li>
+        </ul>
+        <p>If your link fails validation, double-check the host and that it points directly to an image file.</p>
+    </div>
+</div>
+{% endblock %}
