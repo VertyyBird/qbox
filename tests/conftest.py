@@ -29,6 +29,12 @@ def client():
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
     )
     with flask_app.app_context():
+        # Reset any cached engine/session that might point at a developer DB.
+        db.session.remove()
+        engines = db.engines
+        if None in engines:
+            engines[None].dispose()
+        engines[None] = db.create_engine(flask_app.config['SQLALCHEMY_DATABASE_URI'])
         db.create_all()
     with flask_app.test_client() as client:
         yield client
