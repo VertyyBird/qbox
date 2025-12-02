@@ -53,7 +53,15 @@ def load_user(user_id):
 
 @app.context_processor
 def inject_now():
-    return {'now': utcnow}
+    unanswered_count = 0
+    if current_user.is_authenticated:
+        unanswered_count = (
+            Question.query
+            .filter_by(receiver_id=current_user.id)
+            .filter(~Question.answers.any())
+            .count()
+        )
+    return {'now': utcnow, 'unanswered_count': unanswered_count}
 
 @app.template_filter('time_since')
 def time_since(dt):

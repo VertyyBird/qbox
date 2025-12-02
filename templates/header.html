@@ -26,7 +26,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 <li><a class="btn" href="{{ url_for('feed') }}">Recent</a></li>
                 {% if current_user.is_authenticated %}
                 <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}</a></li>
-                <li><a class="btn" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li>
+                    <a class="btn" href="{{ url_for('dashboard') }}">
+                        Dashboard{% if unanswered_count %} - {{ unanswered_count }}{% endif %}
+                    </a>
+                </li>
                 <li><a class="btn" href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
                 <li><a class="btn" href="{{ url_for('login') }}">Login</a></li>

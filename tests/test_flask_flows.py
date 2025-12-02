@@ -49,6 +49,36 @@ def test_registration_and_login(client):
     assert b"Unanswered Questions" in resp.data
 
 
+def test_dashboard_button_shows_unanswered_count(client):
+    register(client, "alice", "alice@example.com")
+    register(client, "bob", "bob@example.com")
+
+    login(client, "bob@example.com")
+    client.post(
+        "/profile/alice",
+        data={"question_text": "Hello Alice?", "anonymous": "y"},
+        follow_redirects=True,
+    )
+    client.get("/logout", follow_redirects=True)
+
+    login(client, "alice@example.com")
+    resp = client.get("/", follow_redirects=True)
+    assert resp.status_code == 200
+    assert b"Dashboard - 1" in resp.data
+
+    alice = User.query.filter_by(username="alice").first()
+    question = Question.query.filter_by(receiver_id=alice.id).first()
+    client.post(
+        "/profile/alice",
+        data={"question_id": question.id, "answer_text": "Answering now"},
+        follow_redirects=True,
+    )
+
+    resp = client.get("/", follow_redirects=True)
+    assert resp.status_code == 200
+    assert b"Dashboard - 1" not in resp.data
+
+
 def test_question_submission(client):
     register(client, "alice", "alice@example.com")
     register(client, "bob", "bob@example.com")
