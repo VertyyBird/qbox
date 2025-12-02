@@ -30,8 +30,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <div class="card-header">
             <div aria-hidden="true"></div>
             <div class="card-meta">
-                Answered {{ answer.created_at|time_since }}<br>
-                <a href="{{ url_for('answer_permalink', username=user.username, public_id=answer.public_id) }}">Permalink</a>
+                Answered {{ answer.created_at|time_since }}
             </div>
         </div>
         <p><strong>Question:</strong><br>{{ answer.question.question_text|nl2br }}</p>
