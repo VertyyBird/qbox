@@ -21,6 +21,7 @@ from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateA
 from models import User, Question, Answer, utcnow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
@@ -40,12 +41,20 @@ if not secret_key:
 app.config['SECRET_KEY'] = secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///qbox.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+if os.getenv('FLASK_ENV') == 'production':
+    # Lock down host/canonical scheme in production.
+    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', None)
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 db.init_app(app)
 migrate.init_app(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# Respect proxy headers for correct URL generation in production.
+if os.getenv('FLASK_ENV') == 'production':
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 @login_manager.user_loader
 def load_user(user_id):
