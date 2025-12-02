@@ -18,19 +18,27 @@ from flask import Flask, render_template, url_for, flash, redirect, request, abo
 from markupsafe import Markup, escape
 from extensions import db, migrate
 from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm
-from models import User, Question, Answer
+from models import User, Question, Answer, utcnow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
+import secrets
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///qbox.db'
+secret_key = os.getenv('SECRET_KEY')
+if not secret_key:
+    if os.getenv('FLASK_ENV') == 'production':
+        raise RuntimeError('SECRET_KEY not set; define it in your environment or .env')
+    secret_key = secrets.token_hex(16)
+    print('Warning: SECRET_KEY not set; generated a temporary key for development.')
+
+app.config['SECRET_KEY'] = secret_key
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///qbox.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -41,15 +49,20 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 @app.context_processor
 def inject_now():
-    return {'now': datetime.utcnow}
+    return {'now': utcnow}
 
 @app.template_filter('time_since')
 def time_since(dt):
-    now = datetime.utcnow()
+    # Normalize to timezone-aware UTC to avoid naive/aware conflicts.
+    if dt is None:
+        return ''
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    now = utcnow()
     diff = now - dt
     if diff < timedelta(hours=24):
         hours = diff.seconds // 3600
@@ -81,7 +94,12 @@ def home():
 @app.route('/feed')
 def feed():
     """Public feed showing recent answers."""
-    answers = Answer.query.order_by(Answer.created_at.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    answers = (
+        Answer.query
+        .order_by(Answer.created_at.desc())
+        .paginate(page=page, per_page=20, error_out=False)
+    )
     return render_template('feed.html', answers=answers)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -137,13 +155,17 @@ def profile(username):
     question_form = QuestionForm()
     answer_form = AnswerForm()
     if question_form.validate_on_submit():
+        ip_address = (
+            request.access_route[0]
+            if request.access_route
+            else request.remote_addr
+        ) or '0.0.0.0'
         if current_user.is_authenticated:
             sender_id = current_user.id
             is_anonymous = question_form.anonymous.data
         else:
             sender_id = None
             is_anonymous = True
-        ip_address = request.remote_addr  # Capture the IP address
         question = Question(
             sender_id=sender_id,
             receiver_id=user.id,
@@ -158,9 +180,11 @@ def profile(username):
     if answer_form.validate_on_submit():
         if not current_user.is_authenticated or current_user.id != user.id:
             abort(403)
-        question_id = request.form.get('question_id')
-        question = Question.query.get(question_id)
-        if question and not question.answers:
+        question_id = request.form.get('question_id', type=int)
+        question = Question.query.filter_by(id=question_id, receiver_id=user.id).first()
+        if not question:
+            abort(404)
+        if not question.answers:
             answer = Answer(question_id=question.id, author_id=current_user.id, answer_text=answer_form.answer_text.data)
             db.session.add(answer)
             db.session.commit()

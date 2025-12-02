@@ -18,7 +18,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from urllib.parse import urlparse
-from urllib.request import Request, build_opener, HTTPRedirectHandler, URLError
+from urllib.request import Request, build_opener, URLError
 from urllib.error import HTTPError
 from models import User
 from flask_login import current_user
@@ -38,28 +38,28 @@ ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 
 def _url_is_accessible(url: str) -> bool:
-    """Return True if the url responds with a successful non-redirect status."""
-    class _NoRedirect(HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, headers, newurl):
-            return None
+    """Return True if the url responds with a 2xx status after following at most one redirect."""
+    def _host_allowed(target_url: str) -> bool:
+        target_host = urlparse(target_url).netloc.lower()
+        return any(target_host.endswith(h) for h in ALLOWED_AVATAR_HOSTS)
 
-        def http_error_302(self, req, fp, code, msg, headers):
-            raise HTTPError(req.full_url, code, msg, headers, fp)
+    def _try_request(method: str) -> bool:
+        req = Request(url, method=method)
+        try:
+            with build_opener().open(req, timeout=5) as resp:
+                final_url = resp.geturl()
+                if not _host_allowed(final_url):
+                    return False
+                return 200 <= resp.status < 300
+        except HTTPError as e:
+            # Accept a redirect or a HEAD-not-allowed by retrying with GET.
+            if e.code in {301, 302, 303, 307, 308, 405} and method == "HEAD":
+                return _try_request("GET")
+            return False
+        except URLError:
+            return False
 
-        http_error_301 = http_error_302
-        http_error_303 = http_error_302
-        http_error_307 = http_error_302
-        http_error_308 = http_error_302
-
-    opener = build_opener(_NoRedirect())
-    request = Request(url, method="HEAD")
-    try:
-        with opener.open(request, timeout=5) as resp:
-            return 200 <= resp.status < 300
-    except HTTPError as e:
-        return False
-    except URLError:
-        return False
+    return _try_request("HEAD")
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -140,4 +140,3 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError('Avatar URL must end with an image file extension.')
             if not _url_is_accessible(avatar_url.data):
                 raise ValidationError("Avatar URL is not accessible or redirects.")
-

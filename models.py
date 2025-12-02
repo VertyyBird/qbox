@@ -14,9 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from extensions import db  # Import db from extensions
 from flask_login import UserMixin
+
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 class User(db.Model, UserMixin):
     """
@@ -36,7 +40,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     bio = db.Column(db.Text)
     avatar_url = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
     questions = db.relationship('Question', backref='receiver', lazy=True, foreign_keys='Question.receiver_id')
     answers = db.relationship('Answer', backref='author', lazy=True)
 
@@ -50,7 +54,7 @@ class Question(db.Model):
     is_anonymous = db.Column(db.Boolean, default=False)
     question_text = db.Column(db.String(500), nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)  # New field for IP address
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_questions')
     answers = db.relationship('Answer', backref='question', lazy=True)
 
@@ -62,7 +66,7 @@ class Answer(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     answer_text = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow)
 
     def __repr__(self):
         return f'<Answer {self.id}>'

@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 {% block content %}
     <h2>Recently Answered Questions</h2>
     <ul>
-        {% for answer in answers %}
+        {% for answer in answers.items %}
             <li>
                 <strong>Question:</strong> {{ answer.question.question_text|nl2br }}<br>
                 <strong>Answer:</strong> {{ answer.answer_text|nl2br }}<br>
@@ -33,5 +33,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </li>
         {% endfor %}
     </ul>
+    <div>
+        {% if answers.has_prev %}
+            <a href="{{ url_for('feed', page=answers.prev_num) }}">Previous</a>
+        {% endif %}
+        <span>Page {{ answers.page }} of {{ answers.pages }}</span>
+        {% if answers.has_next %}
+            <a href="{{ url_for('feed', page=answers.next_num) }}">Next</a>
+        {% endif %}
+    </div>
 {% endblock %}
-
