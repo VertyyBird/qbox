@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import secrets
 from datetime import datetime, timezone
 from extensions import db  # Import db from extensions
 from flask_login import UserMixin
@@ -66,7 +67,24 @@ class Answer(db.Model):
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     answer_text = db.Column(db.Text, nullable=False)
+    public_id = db.Column(db.String(16), unique=True, nullable=False, index=True)
     created_at = db.Column(db.DateTime, default=utcnow)
 
     def __repr__(self):
         return f'<Answer {self.id}>'
+
+    @staticmethod
+    def generate_public_id():
+        """
+        Generate a unique, non-sequential public identifier for permalink use.
+        Retries on collision to keep IDs unique.
+        """
+        while True:
+            candidate = secrets.token_hex(8)
+            if not Answer.query.filter_by(public_id=candidate).first():
+                return candidate
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not getattr(self, 'public_id', None):
+            self.public_id = self.generate_public_id()

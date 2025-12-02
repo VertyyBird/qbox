@@ -110,6 +110,13 @@ def feed():
     )
     return render_template('feed.html', answers=answers)
 
+@app.route('/profile/<username>/a/<public_id>')
+def answer_permalink(username, public_id):
+    """Show a single answer permalinked by its public ID."""
+    user = User.query.filter_by(username=username).first_or_404()
+    answer = Answer.query.filter_by(public_id=public_id, author_id=user.id).first_or_404()
+    return render_template('answer.html', user=user, answer=answer)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
