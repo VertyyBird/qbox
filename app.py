@@ -398,15 +398,25 @@ def admin_panel():
         db.session.query(
             AnswerReport.answer_id,
             AnswerReport.reason,
-            AnswerReport.created_at
+            AnswerReport.created_at,
+            AnswerReport.reporter_user_id,
+            AnswerReport.reporter_ip,
+            User.username
         )
+        .join(User, User.id == AnswerReport.reporter_user_id, isouter=True)
         .filter(AnswerReport.resolved.is_(False))
         .order_by(AnswerReport.created_at.desc())
         .all()
     )
     grouped = {}
     for r in answer_reports_raw:
-        grouped.setdefault(r.answer_id, []).append({'reason': r.reason, 'created_at': r.created_at.isoformat() if r.created_at else ''})
+        reporter = r.username or r.reporter_ip or 'Unknown'
+        grouped.setdefault(r.answer_id, []).append({
+            'reason': r.reason,
+            'created_at': r.created_at.isoformat() if r.created_at else '',
+            'created_human': time_since(r.created_at) if r.created_at else 'unknown',
+            'reporter': reporter,
+        })
     answer_reports = []
     for aid, reports in grouped.items():
         answer_reports.append({

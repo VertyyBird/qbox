@@ -12,7 +12,8 @@
       const reports = JSON.parse(reportsJson);
       reports.forEach((item) => {
         const li = document.createElement('li');
-        li.textContent = `${item.reason || 'No reason provided.'} (${item.created_at || 'unknown'})`;
+        const detail = `${item.reason || 'No reason provided.'} — ${item.reporter || 'Unknown reporter'} at ${item.created_human || 'unknown time'}`;
+        li.textContent = detail;
         list.appendChild(li);
       });
     } catch (e) {
