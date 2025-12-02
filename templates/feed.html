@@ -38,14 +38,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
                         <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
                         <form method="POST" action="{{ url_for('report_answer', answer_id=answer.id) }}">
-                            {{ report_form.hidden_tag() }}
+                            {{ report_form.csrf_token }}
                             <input type="hidden" name="answer_id" value="{{ answer.id }}">
                             <input type="hidden" name="reason" value="">
                             <button type="submit">Report</button>
                         </form>
-                    </li>
-                {% endfor %}
-            </ul>
+            </li>
+        {% endfor %}
+    </ul>
             <div>
                 {% if answers.has_prev %}
                     <a href="{{ url_for('feed', page=answers.prev_num, users=new_users.page) }}">Previous</a>

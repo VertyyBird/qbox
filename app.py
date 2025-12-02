@@ -68,6 +68,7 @@ def inject_now():
             Question.query
             .filter_by(receiver_id=current_user.id)
             .filter(~Question.answers.any())
+            .filter_by(is_hidden=False)
             .count()
         )
     return {'now': utcnow, 'unanswered_count': unanswered_count}
