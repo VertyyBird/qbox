@@ -53,6 +53,8 @@ class Question(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     is_anonymous = db.Column(db.Boolean, default=False)
+    is_hidden = db.Column(db.Boolean, default=False, nullable=False)
+    is_flagged = db.Column(db.Boolean, default=False, nullable=False)
     question_text = db.Column(db.String(500), nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)  # New field for IP address
     created_at = db.Column(db.DateTime, default=utcnow)

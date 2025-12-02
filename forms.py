@@ -22,7 +22,7 @@ from urllib.request import Request, URLError, build_opener
 
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField, HiddenField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 from models import User
@@ -145,8 +145,6 @@ class RegistrationForm(FlaskForm):
                 raise ValidationError('Avatar URL is not accessible or redirects.')
             if not _image_within_render_bounds(avatar_url.data):
                 raise ValidationError(f'Avatar image must be at most {MAX_AVATAR_DIMENSION}x{MAX_AVATAR_DIMENSION} pixels.')
-            if not _image_within_render_bounds(avatar_url.data):
-                raise ValidationError(f'Avatar image must be at most {MAX_AVATAR_DIMENSION}x{MAX_AVATAR_DIMENSION} pixels.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -196,3 +194,11 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError('Avatar URL must end with an image file extension.')
             if not _url_is_accessible(avatar_url.data):
                 raise ValidationError("Avatar URL is not accessible or redirects.")
+            if not _image_within_render_bounds(avatar_url.data):
+                raise ValidationError(f'Avatar image must be at most {MAX_AVATAR_DIMENSION}x{MAX_AVATAR_DIMENSION} pixels.')
+
+
+class ModerateQuestionForm(FlaskForm):
+    question_id = HiddenField(validators=[DataRequired()])
+    action = HiddenField(validators=[DataRequired()])
+    submit = SubmitField('Confirm')

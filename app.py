@@ -17,7 +17,7 @@
 from flask import Flask, render_template, url_for, flash, redirect, request, abort
 from markupsafe import Markup, escape
 from extensions import db, migrate
-from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm
+from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm, ModerateQuestionForm
 from models import User, Question, Answer, utcnow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -189,11 +189,22 @@ def profile(username):
     question_form = QuestionForm()
     answer_form = AnswerForm()
     if question_form.validate_on_submit():
+        # Simple per-IP rate limit: max 5 questions per minute per receiver.
         ip_address = (
             request.access_route[0]
             if request.access_route
             else request.remote_addr
         ) or '0.0.0.0'
+        recent_window = utcnow() - timedelta(minutes=1)
+        recent_count = (
+            Question.query
+            .filter_by(receiver_id=user.id, ip_address=ip_address)
+            .filter(Question.created_at >= recent_window)
+            .count()
+        )
+        if recent_count >= 5:
+            flash('You are sending questions too quickly. Please wait a moment and try again.', 'danger')
+            return redirect(url_for('profile', username=username))
         if current_user.is_authenticated:
             sender_id = current_user.id
             is_anonymous = question_form.anonymous.data
@@ -242,12 +253,14 @@ def dashboard():
         Question.query
         .filter_by(receiver_id=current_user.id)
         .filter(~Question.answers.any())
+        .filter_by(is_hidden=False)
         .order_by(Question.created_at.desc())
         .all()
     )
     answer_form = AnswerForm()
+    moderate_form = ModerateQuestionForm()
     return render_template('dashboard.html', unanswered_questions=unanswered_questions,
-                           answer_form=answer_form)
+                           answer_form=answer_form, moderate_form=moderate_form)
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -272,6 +285,29 @@ def settings():
         update_form.avatar_url.data = current_user.avatar_url
 
     return render_template('settings.html', update_form=update_form)
+
+
+@app.route('/questions/<int:question_id>/moderate', methods=['POST'])
+@login_required
+def moderate_question(question_id):
+    form = ModerateQuestionForm()
+    if not form.validate_on_submit() or int(form.question_id.data) != question_id:
+        abort(400)
+    question = Question.query.get_or_404(question_id)
+    if question.receiver_id != current_user.id:
+        abort(403)
+    action = form.action.data
+    if action == 'hide':
+        question.is_hidden = True
+        flash('Question hidden.', 'success')
+    elif action == 'flag':
+        question.is_flagged = True
+        question.is_hidden = True
+        flash('Question flagged and hidden.', 'success')
+    else:
+        abort(400)
+    db.session.commit()
+    return redirect(url_for('dashboard'))
 
 
 @app.errorhandler(404)

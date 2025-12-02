@@ -58,6 +58,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 {{ answer_form.submit() }}
                             </div>
                         </form>
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <form method="POST" action="{{ url_for('moderate_question', question_id=question.id) }}">
+                                {{ moderate_form.csrf_token }}
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                                <input type="hidden" name="action" value="hide">
+                                <button type="submit">Hide</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('moderate_question', question_id=question.id) }}">
+                                {{ moderate_form.csrf_token }}
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                                <input type="hidden" name="action" value="flag">
+                                <button type="submit">Flag as abuse</button>
+                            </form>
+                        </div>
                     </li>
                 {% endfor %}
             {% else %}
