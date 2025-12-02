@@ -27,7 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 {% if current_user.is_authenticated %}
                 <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}{% if current_user.is_admin %} (ID {{ current_user.id }}){% endif %}</a></li>
                 <li>
-                    <a class="btn" href="{{ url_for('dashboard') }}">
+                    <a class="btn {% if unanswered_count %}btn-attention{% endif %}" href="{{ url_for('dashboard') }}">
                         Dashboard{% if unanswered_count %} - {{ unanswered_count }}{% endif %}
                     </a>
                 </li>

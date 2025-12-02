@@ -81,6 +81,16 @@ header nav ul li a:hover {
     background-color: #0056b3;
 }
 
+.btn-attention {
+    background-color: #f59f00;
+    color: #1f2a3d;
+}
+
+.btn-attention:hover {
+    background-color: #d48806;
+    color: #fff;
+}
+
 .page-shell,
 main {
     max-width: 960px;
