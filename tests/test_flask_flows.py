@@ -133,7 +133,7 @@ def test_update_account_info(client, monkeypatch):
     bio_text = "Hello there"
     avatar = "https://avatars.githubusercontent.com/u/1.png"
     client.post(
-        "/dashboard",
+        "/settings",
         data={
             "username": "alice",
             "email": "alice@example.com",
@@ -159,7 +159,7 @@ def test_avatar_url_requires_image_extension(client):
 
     invalid_avatar = "https://avatars.githubusercontent.com/u/1.txt"
     client.post(
-        "/dashboard",
+        "/settings",
         data={
             "username": "eve",
             "email": "eve@example.com",
@@ -183,7 +183,7 @@ def test_avatar_url_must_be_accessible(client, monkeypatch):
     monkeypatch.setattr("forms._url_is_accessible", lambda url: False)
 
     client.post(
-        "/dashboard",
+        "/settings",
         data={
             "username": "tom",
             "email": "tom@example.com",

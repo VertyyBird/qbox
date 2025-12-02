@@ -223,8 +223,14 @@ def dashboard():
         .all()
     )
     answer_form = AnswerForm()
-    update_form = UpdateAccountForm()
+    return render_template('dashboard.html', unanswered_questions=unanswered_questions,
+                           answer_form=answer_form)
 
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    update_form = UpdateAccountForm()
     if update_form.submit.data and update_form.validate_on_submit():
         current_user.username = update_form.username.data
         current_user.email = update_form.email.data
@@ -234,7 +240,7 @@ def dashboard():
             current_user.password_hash = generate_password_hash(update_form.password.data)
         db.session.commit()
         flash('Your account has been updated!', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('settings'))
 
     if request.method == 'GET':
         update_form.username.data = current_user.username
@@ -242,8 +248,7 @@ def dashboard():
         update_form.bio.data = current_user.bio
         update_form.avatar_url.data = current_user.avatar_url
 
-    return render_template('dashboard.html', unanswered_questions=unanswered_questions,
-                           answer_form=answer_form, update_form=update_form)
+    return render_template('settings.html', update_form=update_form)
 
 
 @app.errorhandler(404)
