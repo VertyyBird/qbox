@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <ul>
                 <li><a class="btn" href="{{ url_for('feed') }}">Feed</a></li>
                 {% if current_user.is_authenticated %}
-                <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}</a></li>
+                <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}{% if current_user.is_admin %} (ID {{ current_user.id }}){% endif %}</a></li>
                 <li>
                     <a class="btn" href="{{ url_for('dashboard') }}">
                         Dashboard{% if unanswered_count %} - {{ unanswered_count }}{% endif %}

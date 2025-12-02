@@ -41,8 +41,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         {% for q in flagged_questions %}
             <li class="card">
                 <div class="card-header">
-                    <div><strong>To:</strong> {{ q.receiver.username }}</div>
-                    <div class="card-meta">From {{ q.sender.username if q.sender and not q.is_anonymous else 'Anonymous' }}</div>
+                    <div><strong>To:</strong> {{ q.receiver.username }} {% if q.receiver_id %}(ID {{ q.receiver_id }}){% endif %}</div>
+                    <div class="card-meta">From {% if q.sender and not q.is_anonymous %}{{ q.sender.username }} (ID {{ q.sender_id }}){% else %}Anonymous{% endif %}</div>
                 </div>
                 <p>{{ q.question_text|nl2br }}</p>
             </li>

@@ -35,8 +35,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                                 <strong>Question</strong><br>
                                 {% if question.sender_id and not question.is_anonymous %}
                                     From <a href="{{ url_for('profile', username=question.sender.username) }}">{{ question.sender.username }}</a>
+                                    {% if current_user.is_admin %}(ID {{ question.sender_id }}){% endif %}
                                 {% else %}
                                     From Anonymous
+                                    {% if current_user.is_admin %}(IP {{ question.ip_address }}){% endif %}
                                 {% endif %}
                             </div>
                             <div class="card-meta">

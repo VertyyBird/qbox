@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 {% for answer in answers.items %}
                     <li class="card">
                         <div class="card-header">
-                            <div><strong>Answered by</strong> <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a></div>
+                            <div><strong>Answered by</strong> <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a> {% if current_user.is_authenticated and current_user.is_admin %}(ID {{ answer.author.id }}){% endif %}</div>
                             <div class="card-meta">
                                 {{ answer.created_at|time_since }} -
                                 <a href="{{ url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id) }}">Permalink</a>
@@ -62,7 +62,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                 {% for u in new_users.items %}
                     <li class="card">
                         <div class="card-header">
-                            <div><a href="{{ url_for('profile', username=u.username) }}">{{ u.username }}</a></div>
+                            <div><a href="{{ url_for('profile', username=u.username) }}">{{ u.username }}</a> {% if current_user.is_authenticated and current_user.is_admin %}(ID {{ u.id }}){% endif %}</div>
                             <div class="card-meta">Joined {{ u.created_at|time_since }}</div>
                         </div>
                         {% if u.bio %}
