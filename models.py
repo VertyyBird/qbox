@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from extensions import db  # Import db from extensions
 from flask_login import UserMixin
 
@@ -41,6 +41,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     bio = db.Column(db.Text)
     avatar_url = db.Column(db.String(255))
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow)
     questions = db.relationship('Question', backref='receiver', lazy=True, foreign_keys='Question.receiver_id')
     answers = db.relationship('Answer', backref='author', lazy=True)
@@ -90,3 +91,33 @@ class Answer(db.Model):
         super().__init__(**kwargs)
         if not getattr(self, 'public_id', None):
             self.public_id = self.generate_public_id()
+
+class AnswerReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    answer_id = db.Column(db.Integer, db.ForeignKey('answer.id'), nullable=False)
+    reporter_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    reporter_ip = db.Column(db.String(45), nullable=False)
+    reason = db.Column(db.String(500))
+    resolved = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow)
+
+    answer = db.relationship('Answer', backref='reports')
+    reporter = db.relationship('User', foreign_keys=[reporter_user_id])
+
+class Block(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    reason = db.Column(db.String(500))
+    expires_at = db.Column(db.DateTime, nullable=True)
+    active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow)
+
+    user = db.relationship('User', backref='blocks')
+
+    def is_active(self):
+        if not self.active:
+            return False
+        if self.expires_at and self.expires_at <= utcnow():
+            return False
+        return True

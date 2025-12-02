@@ -1,0 +1,124 @@
+{#
+Qbox, a Q&A website
+Copyright (C) 2025  Rhys Baker
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#}
+
+{% extends 'base.html' %}
+{% block title %}Admin Moderation - Qbox{% endblock %}
+{% block og_title %}Admin Moderation - Qbox{% endblock %}
+{% block og_description %}Review flags, reports, and blocks.{% endblock %}
+{% block content %}
+<div class="content-section">
+    <h2>Admin Moderation</h2>
+    {% if alerts %}
+        <div class="card">
+            <div class="card-header"><strong>Alerts</strong></div>
+            <ul class="bulleted">
+                {% for alert in alerts %}
+                <li>{{ alert }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+<div class="content-section">
+    <h3>Flagged Questions</h3>
+    <ul class="card-list">
+        {% for q in flagged_questions %}
+            <li class="card">
+                <div class="card-header">
+                    <div><strong>To:</strong> {{ q.receiver.username }}</div>
+                    <div class="card-meta">From {{ q.sender.username if q.sender and not q.is_anonymous else 'Anonymous' }}</div>
+                </div>
+                <p>{{ q.question_text|nl2br }}</p>
+            </li>
+        {% else %}
+            <li class="card"><p>No flagged questions.</p></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="content-section">
+    <h3>Answer Reports</h3>
+    <ul class="card-list">
+        {% for report in answer_reports %}
+            <li class="card">
+                <div class="card-header">
+                    <div><a href="{{ url_for('answer_permalink', username=report.answer.author.username, public_id=report.answer.public_id) }}">View answer</a></div>
+                    <div class="card-meta">{{ report.created_at|time_since }}</div>
+                </div>
+                <p>{{ report.reason or 'No reason provided.' }}</p>
+                <form method="POST" action="{{ url_for('resolve_report', report_id=report.id) }}">
+                    {{ block_form.csrf_token }}
+                    <button type="submit">Mark Resolved</button>
+                </form>
+            </li>
+        {% else %}
+            <li class="card"><p>No open reports.</p></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="content-section">
+    <h3>Blocks</h3>
+    <div class="card">
+        <form method="POST" action="{{ url_for('create_block') }}">
+            {{ block_form.hidden_tag() }}
+            <div class="form-group">
+                {{ block_form.user_id.label }} {{ block_form.user_id(size=8, class_="form-control") }} (leave blank to block by IP)
+            </div>
+            <div class="form-group">
+                {{ block_form.ip_address.label }} {{ block_form.ip_address(size=24, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ block_form.reason.label }} {{ block_form.reason(rows=2, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ block_form.hours.label }} {{ block_form.hours(size=8, class_="form-control") }} (expiration hours, blank = no expiration)
+            </div>
+            <div class="form-actions">
+                {{ block_form.submit() }}
+            </div>
+        </form>
+    </div>
+    <ul class="card-list">
+        {% for block in blocks %}
+            <li class="card">
+                <div class="card-header">
+                    <div>
+                        {% if block.user %}User: {{ block.user.username }}{% endif %}
+                        {% if block.ip_address %}IP: {{ block.ip_address }}{% endif %}
+                    </div>
+                    <div class="card-meta">
+                        {% if block.active %}Active{% else %}Inactive{% endif %}<br>
+                        {% if block.expires_at %}Expires {{ block.expires_at|time_since }}{% else %}No expiry{% endif %}
+                    </div>
+                </div>
+                <p>{{ block.reason or 'No reason provided.' }}</p>
+                {% if block.active %}
+                <form method="POST" action="{{ url_for('deactivate_block', block_id=block.id) }}">
+                    {{ block_form.csrf_token }}
+                    <button type="submit">Deactivate</button>
+                </form>
+                {% endif %}
+            </li>
+        {% else %}
+            <li class="card"><p>No blocks.</p></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -37,6 +37,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         </div>
                         <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
                         <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
+                        <form method="POST" action="{{ url_for('report_answer', answer_id=answer.id) }}">
+                            {{ report_form.hidden_tag() }}
+                            <input type="hidden" name="answer_id" value="{{ answer.id }}">
+                            <input type="hidden" name="reason" value="">
+                            <button type="submit">Report</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>

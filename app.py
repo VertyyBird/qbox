@@ -17,8 +17,8 @@
 from flask import Flask, render_template, url_for, flash, redirect, request, abort
 from markupsafe import Markup, escape
 from extensions import db, migrate
-from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm, ModerateQuestionForm
-from models import User, Question, Answer, utcnow
+from forms import RegistrationForm, LoginForm, QuestionForm, AnswerForm, UpdateAccountForm, ModerateQuestionForm, AnswerReportForm, BlockForm
+from models import User, Question, Answer, AnswerReport, Block, utcnow
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -104,6 +104,24 @@ def nl2br(value):
     escaped = escape(value)
     return Markup(escaped.replace('\n', Markup('<br>')))
 
+
+def _active_block_for(user_id, ip_address):
+    now = utcnow()
+    blocks = Block.query.filter_by(active=True).all()
+    matched = None
+    for block in blocks:
+        if block.expires_at and block.expires_at <= now:
+            block.active = False
+            continue
+        if block.user_id and user_id and block.user_id == user_id:
+            matched = block
+            break
+        if block.ip_address and ip_address and block.ip_address == ip_address:
+            matched = block
+            break
+    db.session.commit()
+    return matched
+
 @app.route('/')
 def home():
     return render_template('index.html', current_user=current_user)
@@ -123,18 +141,38 @@ def feed():
         .order_by(User.created_at.desc())
         .paginate(page=user_page, per_page=10, error_out=False)
     )
-    return render_template('feed.html', answers=answers, new_users=new_users)
+    report_form = AnswerReportForm()
+    return render_template('feed.html', answers=answers, new_users=new_users, report_form=report_form)
 
 @app.route('/user/<username>/a/<public_id>')
 def answer_permalink(username, public_id):
     """Show a single answer permalinked by its public ID."""
     user = User.query.filter_by(username=username).first_or_404()
     answer = Answer.query.filter_by(public_id=public_id, author_id=user.id).first_or_404()
-    return render_template('answer.html', user=user, answer=answer)
+    report_form = AnswerReportForm()
+    return render_template('answer.html', user=user, answer=answer, report_form=report_form)
 
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
+
+@app.route('/answers/<int:answer_id>/report', methods=['POST'])
+def report_answer(answer_id):
+    form = AnswerReportForm()
+    if not form.validate_on_submit() or int(form.answer_id.data) != answer_id:
+        abort(400)
+    answer = Answer.query.get_or_404(answer_id)
+    reporter_ip = (request.access_route[0] if request.access_route else request.remote_addr) or '0.0.0.0'
+    report = AnswerReport(
+        answer_id=answer.id,
+        reporter_user_id=current_user.id if current_user.is_authenticated else None,
+        reporter_ip=reporter_ip,
+        reason=form.reason.data,
+    )
+    db.session.add(report)
+    db.session.commit()
+    flash('Answer reported for review.', 'success')
+    return redirect(request.referrer or url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -188,6 +226,7 @@ def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     question_form = QuestionForm()
     answer_form = AnswerForm()
+    report_form = AnswerReportForm()
     if question_form.validate_on_submit():
         # Simple per-IP rate limit: max 5 questions per minute per receiver.
         ip_address = (
@@ -195,6 +234,10 @@ def profile(username):
             if request.access_route
             else request.remote_addr
         ) or '0.0.0.0'
+        block = _active_block_for(current_user.id if current_user.is_authenticated else None, ip_address)
+        if block:
+            flash('You are blocked from submitting questions at this time.', 'danger')
+            return redirect(url_for('profile', username=username))
         recent_window = utcnow() - timedelta(minutes=1)
         recent_count = (
             Question.query
@@ -236,7 +279,7 @@ def profile(username):
             flash('Your answer has been submitted!', 'success')
             return redirect(url_for('profile', username=username))
     answers = Answer.query.filter_by(author_id=user.id).order_by(Answer.created_at.desc()).all()
-    return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form, answers=answers)
+    return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form, answers=answers, report_form=report_form)
 
 @app.route('/profile/<username>')
 def legacy_profile(username):
@@ -304,10 +347,101 @@ def moderate_question(question_id):
         question.is_flagged = True
         question.is_hidden = True
         flash('Question flagged and hidden.', 'success')
+        # Auto-block anonymous IP if repeatedly flagged.
+        if not question.sender_id:
+            flagged_count = Question.query.filter_by(ip_address=question.ip_address, is_flagged=True).count()
+            if flagged_count >= 5 and not _active_block_for(None, question.ip_address):
+                auto_block = Block(
+                    ip_address=question.ip_address,
+                    reason='Auto-blocked after repeated flags',
+                    expires_at=utcnow() + timedelta(days=30),
+                    active=True,
+                )
+                db.session.add(auto_block)
     else:
         abort(400)
     db.session.commit()
     return redirect(url_for('dashboard'))
+
+
+def _admin_required():
+    if not current_user.is_authenticated or not current_user.is_admin:
+        abort(403)
+
+@app.route('/admin/moderation', methods=['GET'])
+def admin_panel():
+    _admin_required()
+    block_form = BlockForm()
+    alerts = []
+    flagged_user_counts = (
+        db.session.query(Question.sender_id, db.func.count(Question.id))
+        .filter(Question.is_flagged.is_(True), Question.sender_id.isnot(None))
+        .group_by(Question.sender_id)
+        .all()
+    )
+    flagged_ip_counts = (
+        db.session.query(Question.ip_address, db.func.count(Question.id))
+        .filter(Question.is_flagged.is_(True))
+        .group_by(Question.ip_address)
+        .all()
+    )
+    for uid, count in flagged_user_counts:
+        if uid and count >= 5:
+            alerts.append(f'User ID {uid} has {count} flagged questions.')
+    for ip, count in flagged_ip_counts:
+        if ip and count >= 5:
+            alerts.append(f'IP {ip} has {count} flagged questions.')
+
+    flagged_questions = Question.query.filter_by(is_flagged=True).order_by(Question.created_at.desc()).all()
+    answer_reports = AnswerReport.query.filter_by(resolved=False).order_by(AnswerReport.created_at.desc()).all()
+    blocks = Block.query.order_by(Block.created_at.desc()).all()
+
+    return render_template('admin.html', flagged_questions=flagged_questions,
+                           answer_reports=answer_reports, blocks=blocks,
+                           alerts=alerts, block_form=block_form)
+
+@app.route('/admin/reports/<int:report_id>/resolve', methods=['POST'])
+def resolve_report(report_id):
+    _admin_required()
+    report = AnswerReport.query.get_or_404(report_id)
+    report.resolved = True
+    db.session.commit()
+    flash('Report resolved.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/blocks', methods=['POST'])
+def create_block():
+    _admin_required()
+    form = BlockForm()
+    if not form.validate_on_submit():
+        abort(400)
+    expires_at = None
+    if form.hours.data:
+        try:
+            hours = int(form.hours.data)
+            expires_at = utcnow() + timedelta(hours=hours)
+        except ValueError:
+            pass
+    block = Block(
+        user_id=form.user_id.data or None,
+        ip_address=form.ip_address.data or None,
+        reason=form.reason.data,
+        expires_at=expires_at,
+        active=True,
+    )
+    db.session.add(block)
+    db.session.commit()
+    flash('Block created.', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/blocks/<int:block_id>/deactivate', methods=['POST'])
+def deactivate_block(block_id):
+    _admin_required()
+    block = Block.query.get_or_404(block_id)
+    block.active = False
+    db.session.commit()
+    flash('Block deactivated.', 'success')
+    return redirect(url_for('admin_panel'))
 
 
 @app.errorhandler(404)

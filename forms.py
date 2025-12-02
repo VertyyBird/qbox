@@ -202,3 +202,17 @@ class ModerateQuestionForm(FlaskForm):
     question_id = HiddenField(validators=[DataRequired()])
     action = HiddenField(validators=[DataRequired()])
     submit = SubmitField('Confirm')
+
+
+class AnswerReportForm(FlaskForm):
+    answer_id = HiddenField(validators=[DataRequired()])
+    reason = TextAreaField('Reason')
+    submit = SubmitField('Report')
+
+
+class BlockForm(FlaskForm):
+    user_id = HiddenField()
+    ip_address = StringField('IP Address')
+    reason = TextAreaField('Reason')
+    hours = StringField('Expires in hours')
+    submit = SubmitField('Block')

@@ -31,6 +31,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                         Dashboard{% if unanswered_count %} - {{ unanswered_count }}{% endif %}
                     </a>
                 </li>
+                {% if current_user.is_admin %}
+                <li><a class="btn" href="{{ url_for('admin_panel') }}">Admin</a></li>
+                {% endif %}
                 <li><a class="btn" href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
                 <li><a class="btn" href="{{ url_for('login') }}">Login</a></li>
