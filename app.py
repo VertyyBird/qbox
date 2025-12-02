@@ -394,22 +394,31 @@ def admin_panel():
             alerts.append(f'IP {ip} has {count} flagged questions.')
 
     flagged_questions = Question.query.filter_by(is_flagged=True).order_by(Question.created_at.desc()).all()
-    answer_reports = (
+    answer_reports_raw = (
         db.session.query(
-            Answer.id.label('answer_id'),
-            db.func.count(AnswerReport.id).label('report_count'),
-            db.func.max(AnswerReport.created_at).label('latest_report'),
+            AnswerReport.answer_id,
+            AnswerReport.reason,
+            AnswerReport.created_at
         )
-        .join(AnswerReport, Answer.id == AnswerReport.answer_id)
         .filter(AnswerReport.resolved.is_(False))
-        .group_by(Answer.id)
-        .order_by(db.func.max(AnswerReport.created_at).desc())
+        .order_by(AnswerReport.created_at.desc())
         .all()
     )
+    grouped = {}
+    for r in answer_reports_raw:
+        grouped.setdefault(r.answer_id, []).append({'reason': r.reason, 'created_at': r.created_at.isoformat() if r.created_at else ''})
+    answer_reports = []
+    for aid, reports in grouped.items():
+        answer_reports.append({
+            'answer_id': aid,
+            'report_count': len(reports),
+            'latest_report': reports[0]['created_at'],
+            'reasons_json': reports,
+        })
     blocks = Block.query.order_by(Block.created_at.desc()).all()
 
     # Fetch answer objects for grouped reports
-    answers_by_id = {a.id: a for a in Answer.query.filter(Answer.id.in_([r.answer_id for r in answer_reports])).all()}
+    answers_by_id = {a.id: a for a in Answer.query.filter(Answer.id.in_([r['answer_id'] for r in answer_reports])).all()}
 
     return render_template('admin.html', flagged_questions=flagged_questions,
                            answer_reports=answer_reports, answers_by_id=answers_by_id,

@@ -75,6 +75,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             </form>
         </div>
     </div>
+    <div class="modal-backdrop" id="report-detail-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h4>Report Reasons</h4>
+                <button data-report-detail-close aria-label="Close report detail modal">×</button>
+            </div>
+            <ul class="report-list" data-report-detail-list></ul>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='js/report.js') }}"></script>
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <script src="{{ url_for('static', filename='js/admin_reports.js') }}"></script>
+    {% endif %}
 </body>
 </html>

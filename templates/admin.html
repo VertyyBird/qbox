@@ -66,7 +66,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                             <strong>Answer removed</strong>
                         {% endif %}
                     </div>
-                    <div class="card-meta">{{ report.report_count }} report(s)</div>
+                    <div class="card-meta">
+                        <a href="#" data-report-detail='{{ report.reasons_json|tojson }}'>{{ report.report_count }} report(s)</a>
+                    </div>
                 </div>
                 {% if answer %}
                 <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>

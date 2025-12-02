@@ -120,6 +120,11 @@ header nav ul li a:hover {
 .modal-open {
     display: flex;
 }
+
+.report-list {
+    list-style: disc;
+    padding-left: 20px;
+}
 .btn-attention {
     background-color: #f59f00;
     color: #1f2a3d;
