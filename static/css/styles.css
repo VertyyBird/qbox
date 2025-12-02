@@ -19,7 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
-    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(180deg, #f8fbff 0%, #eef2f7 100%);
     color: #1f2a3d;
     line-height: 1.6;
@@ -84,6 +86,8 @@ main {
     max-width: 960px;
     margin: 24px auto 48px;
     padding: 0 20px;
+    width: 100%;
+    flex: 1 0 auto;
 }
 
 h1, h2, h3 {
@@ -146,9 +150,8 @@ footer {
     color: #ffffff;
     text-align: center;
     padding: 10px 0;
-    position: relative;
-    bottom: 0;
     width: 100%;
+    flex-shrink: 0;
 }
 
 .centered {
