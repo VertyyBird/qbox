@@ -81,6 +81,15 @@ header nav ul li a:hover {
     background-color: #0056b3;
 }
 
+.btn-active {
+    background-color: #1c7ed6;
+    color: #ffffff;
+}
+
+.btn-active:hover {
+    background-color: #1864ab;
+}
+
 .btn-attention {
     background-color: #f59f00;
     color: #1f2a3d;

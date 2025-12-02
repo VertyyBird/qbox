@@ -17,27 +17,33 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #}
 
 <header>
+    {% set on_feed = request.endpoint == 'feed' %}
+    {% set on_profile = request.endpoint in ['profile', 'legacy_profile'] and current_user.is_authenticated and request.view_args and request.view_args.get('username') == current_user.username %}
+    {% set on_dashboard = request.endpoint == 'dashboard' %}
+    {% set on_admin = request.endpoint and request.endpoint.startswith('admin_') %}
+    {% set on_login = request.endpoint == 'login' %}
+    {% set on_register = request.endpoint == 'register' %}
     <div class="header-main">
         <div class="logo-container">
             <a class="logolink" href="{{ url_for('home') }}"><h1 class="logo">Qbox</h1></a>
         </div>
         <nav>
             <ul>
-                <li><a class="btn" href="{{ url_for('feed') }}">Feed</a></li>
+                <li><a class="btn {% if on_feed %}btn-active{% endif %}" href="{{ url_for('feed') }}">Feed</a></li>
                 {% if current_user.is_authenticated %}
-                <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}{% if current_user.is_admin %} (ID {{ current_user.id }}){% endif %}</a></li>
+                <li><a class="btn {% if on_profile %}btn-active{% endif %}" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}{% if current_user.is_admin %} (ID {{ current_user.id }}){% endif %}</a></li>
                 <li>
-                    <a class="btn {% if unanswered_count %}btn-attention{% endif %}" href="{{ url_for('dashboard') }}">
+                    <a class="btn {% if unanswered_count %}btn-attention{% endif %} {% if on_dashboard %}btn-active{% endif %}" href="{{ url_for('dashboard') }}">
                         Dashboard{% if unanswered_count %} - {{ unanswered_count }}{% endif %}
                     </a>
                 </li>
                 {% if current_user.is_admin %}
-                <li><a class="btn" href="{{ url_for('admin_panel') }}">Admin</a></li>
+                <li><a class="btn {% if on_admin %}btn-active{% endif %}" href="{{ url_for('admin_panel') }}">Admin</a></li>
                 {% endif %}
                 <li><a class="btn" href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
-                <li><a class="btn" href="{{ url_for('login') }}">Login</a></li>
-                <li><a class="btn" href="{{ url_for('register') }}">Register</a></li>
+                <li><a class="btn {% if on_login %}btn-active{% endif %}" href="{{ url_for('login') }}">Login</a></li>
+                <li><a class="btn {% if on_register %}btn-active{% endif %}" href="{{ url_for('register') }}">Register</a></li>
                 {% endif %}
             </ul>
         </nav>
