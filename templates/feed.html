@@ -22,29 +22,60 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 {% block og_description %}Latest answered questions on Qbox.{% endblock %}
 {% block og_type %}website{% endblock %}
 {% block content %}
-    <h2>Recently Answered Questions</h2>
-    <ul class="card-list">
-        {% for answer in answers.items %}
-            <li class="card">
-                <div class="card-header">
-                    <div><strong>Answered by</strong> <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a></div>
-                    <div class="card-meta">
-                        {{ answer.created_at|time_since }} -
-                        <a href="{{ url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id) }}">Permalink</a>
-                    </div>
-                </div>
-                <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
-                <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
-            </li>
-        {% endfor %}
-    </ul>
-    <div>
-        {% if answers.has_prev %}
-            <a href="{{ url_for('feed', page=answers.prev_num) }}">Previous</a>
-        {% endif %}
-        <span>Page {{ answers.page }} of {{ answers.pages }}</span>
-        {% if answers.has_next %}
-            <a href="{{ url_for('feed', page=answers.next_num) }}">Next</a>
-        {% endif %}
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+        <div>
+            <h2>Recently Answered Questions</h2>
+            <ul class="card-list">
+                {% for answer in answers.items %}
+                    <li class="card">
+                        <div class="card-header">
+                            <div><strong>Answered by</strong> <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a></div>
+                            <div class="card-meta">
+                                {{ answer.created_at|time_since }} -
+                                <a href="{{ url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id) }}">Permalink</a>
+                            </div>
+                        </div>
+                        <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
+                        <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div>
+                {% if answers.has_prev %}
+                    <a href="{{ url_for('feed', page=answers.prev_num, users=new_users.page) }}">Previous</a>
+                {% endif %}
+                <span>Page {{ answers.page }} of {{ answers.pages }}</span>
+                {% if answers.has_next %}
+                    <a href="{{ url_for('feed', page=answers.next_num, users=new_users.page) }}">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <h3>New Users</h3>
+            <ul class="card-list">
+                {% for u in new_users.items %}
+                    <li class="card">
+                        <div class="card-header">
+                            <div><a href="{{ url_for('profile', username=u.username) }}">{{ u.username }}</a></div>
+                            <div class="card-meta">Joined {{ u.created_at|time_since }}</div>
+                        </div>
+                        {% if u.bio %}
+                            <p>{{ u.bio|nl2br }}</p>
+                        {% else %}
+                            <p>No bio yet.</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <div>
+                {% if new_users.has_prev %}
+                    <a href="{{ url_for('feed', users=new_users.prev_num, page=answers.page) }}">Previous</a>
+                {% endif %}
+                <span>Page {{ new_users.page }} of {{ new_users.pages }}</span>
+                {% if new_users.has_next %}
+                    <a href="{{ url_for('feed', users=new_users.next_num, page=answers.page) }}">Next</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 {% endblock %}

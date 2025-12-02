@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </div>
         <nav>
             <ul>
-                <li><a class="btn" href="{{ url_for('feed') }}">Recent</a></li>
+                <li><a class="btn" href="{{ url_for('feed') }}">Feed</a></li>
                 {% if current_user.is_authenticated %}
                 <li><a class="btn" href="{{ url_for('profile', username=current_user.username) }}">Profile - {{ current_user.username }}</a></li>
                 <li>

@@ -103,12 +103,18 @@ def home():
 def feed():
     """Public feed showing recent answers."""
     page = request.args.get('page', 1, type=int)
+    user_page = request.args.get('users', 1, type=int)
     answers = (
         Answer.query
         .order_by(Answer.created_at.desc())
         .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template('feed.html', answers=answers)
+    new_users = (
+        User.query
+        .order_by(User.created_at.desc())
+        .paginate(page=user_page, per_page=10, error_out=False)
+    )
+    return render_template('feed.html', answers=answers, new_users=new_users)
 
 @app.route('/profile/<username>/a/<public_id>')
 def answer_permalink(username, public_id):
