@@ -92,6 +92,34 @@ header nav ul li a:hover {
     color: #ffffff;
 }
 
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: min(480px, 92%);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.modal-open {
+    display: flex;
+}
 .btn-attention {
     background-color: #f59f00;
     color: #1f2a3d;

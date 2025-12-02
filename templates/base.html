@@ -45,5 +45,36 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         {% block content %}{% endblock content %}
     </main>
     {% include 'footer.html' %}
+    <div class="modal-backdrop" id="report-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h4>Report Answer</h4>
+                <button data-report-close aria-label="Close report modal">×</button>
+            </div>
+            <form method="POST" action="">
+                {% if report_form %}
+                    {{ report_form.csrf_token }}
+                {% endif %}
+                <input type="hidden" name="answer_id" value="">
+                <div class="form-group">
+                    <label>Reason</label>
+                    <select name="reason_choice" class="form-control">
+                        <option value="spam">Spam</option>
+                        <option value="abuse">Abusive/harassment</option>
+                        <option value="inappropriate">Inappropriate content</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reason_text">Details (optional)</label>
+                    <textarea name="reason_text" rows="2" class="form-control"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/report.js') }}"></script>
 </body>
 </html>

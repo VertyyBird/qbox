@@ -35,25 +35,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </div>
         <p><strong>Question:</strong><br>{{ answer.question.question_text|nl2br }}</p>
         <p><strong>Answer:</strong><br>{{ answer.answer_text|nl2br }}</p>
-        <form method="POST" action="{{ url_for('report_answer', answer_id=answer.id) }}">
-            {{ report_form.csrf_token }}
-            <input type="hidden" name="answer_id" value="{{ answer.id }}">
-            <div class="form-group">
-                <label>Report reason</label>
-                <select name="reason_choice" class="form-control">
-                    <option value="spam">Spam</option>
-                    <option value="abuse">Abusive/harassment</option>
-                    <option value="inappropriate">Inappropriate content</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="reason_text">Details (optional)</label>
-                <textarea name="reason_text" rows="2" class="form-control"></textarea>
-            </div>
-            <div class="form-actions">
-                <button type="submit">Report Answer</button>
-            </div>
-        </form>
+        <button data-report-answer="{{ answer.id }}" data-action="{{ url_for('report_answer', answer_id=answer.id) }}">Report</button>
     </div>
 {% endblock %}
