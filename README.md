@@ -20,12 +20,17 @@ Qbox is my attempt at making a Q&A site like CuriousCat. I'm tired of the new Q&
    python -c 'import secrets; print(secrets.token_hex(16))'
    ```
 
-4. Run the application:
+4. Initialize the database (after creating/activating a virtualenv and installing requirements):
+   ```
+   FLASK_APP=app.py flask db upgrade
+   ```
+
+5. Run the application:
    ```
    python app.py
    ```
 
-5. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
+6. Open your web browser and go to `http://127.0.0.1:5000/` to see the application in action.
 
 ## Running Tests
 
@@ -42,6 +47,19 @@ The tests use Flask's test client and an in-memory SQLite database, so no additi
 Logged-in users can toggle **Ask Anonymously** when submitting a question.
 The site records who asked the question for moderation but hides the
 sender's identity from other users.
+
+## URLs and routes
+
+- User pages live at `/user/<username>`.
+- Answers have permalinks at `/user/<username>/a/<public_id>`.
+- Account settings are at `/settings`.
+- Admins (users with `is_admin=True`) can review reports/flags at `/admin/moderation`.
+
+## Moderation and avatars
+
+- Question submission is rate-limited per IP and can be flagged/hidden by receivers; admins can block users or IPs with optional expiry.
+- Answers can be reported and reviewed in the admin panel; reports do not auto-hide answers.
+- Avatar URLs must use allowed hosts, valid image extensions, be reachable, and be no larger than 300x300px.
 
 ## Template notes
 
