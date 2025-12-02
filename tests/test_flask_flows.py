@@ -55,7 +55,7 @@ def test_dashboard_button_shows_unanswered_count(client):
 
     login(client, "bob@example.com")
     client.post(
-        "/profile/alice",
+        "/user/alice",
         data={"question_text": "Hello Alice?", "anonymous": "y"},
         follow_redirects=True,
     )
@@ -69,7 +69,7 @@ def test_dashboard_button_shows_unanswered_count(client):
     alice = User.query.filter_by(username="alice").first()
     question = Question.query.filter_by(receiver_id=alice.id).first()
     client.post(
-        "/profile/alice",
+        "/user/alice",
         data={"question_id": question.id, "answer_text": "Answering now"},
         follow_redirects=True,
     )
@@ -85,7 +85,7 @@ def test_question_submission(client):
 
     login(client, "alice@example.com")
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_text": "Hello?", "anonymous": "y"},
         follow_redirects=True,
     )
@@ -102,7 +102,7 @@ def test_answer_flow(client):
 
     login(client, "alice@example.com")
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_text": "Question for Bob", "anonymous": "y"},
         follow_redirects=True,
     )
@@ -111,7 +111,7 @@ def test_answer_flow(client):
     login(client, "bob@example.com")
     question = Question.query.first()
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_id": question.id, "answer_text": "42"},
         follow_redirects=True,
     )
@@ -148,7 +148,7 @@ def test_update_account_info(client, monkeypatch):
     assert user.bio == bio_text
     assert user.avatar_url == avatar
 
-    resp = client.get("/profile/alice", follow_redirects=True)
+    resp = client.get("/user/alice", follow_redirects=True)
     assert bio_text.encode() in resp.data
     assert avatar.encode() in resp.data
 
@@ -206,12 +206,12 @@ def test_feed_order_and_content(client):
     # Alice asks Bob two questions
     login(client, "alice@example.com")
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_text": "First?", "anonymous": "y"},
         follow_redirects=True,
     )
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_text": "Second?", "anonymous": "y"},
         follow_redirects=True,
     )
@@ -221,12 +221,12 @@ def test_feed_order_and_content(client):
     login(client, "bob@example.com")
     questions = Question.query.order_by(Question.created_at).all()
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_id": questions[0].id, "answer_text": "A1"},
         follow_redirects=True,
     )
     client.post(
-        "/profile/bob",
+        "/user/bob",
         data={"question_id": questions[1].id, "answer_text": "A2"},
         follow_redirects=True,
     )
@@ -239,7 +239,7 @@ def test_feed_order_and_content(client):
     # Ensure questions and author link are present
     assert "First?" in html
     assert "Second?" in html
-    assert "/profile/bob" in html
+    assert "/user/bob" in html
 
     # Answers should be in reverse chronological order (A2 before A1)
     assert html.index("Second?") < html.index("First?")

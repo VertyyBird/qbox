@@ -9,7 +9,7 @@ Potential Domains: qbox.lol or qbox.social
 ### 1. User Accounts
 - [x] Sign-up, login, and logout functionality. 
 - [x] Password hashing for secure authentication. 
-- [x] Unique user pages (e.g., `/users/username`). 
+- [x] Unique user pages (e.g., `/user/username`). 
 
 ### 2. Question Submission
 - [x] Allow visitors (anonymous or registered users) to submit questions to a specific user's page. 

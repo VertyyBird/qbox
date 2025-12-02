@@ -125,7 +125,7 @@ def feed():
     )
     return render_template('feed.html', answers=answers, new_users=new_users)
 
-@app.route('/profile/<username>/a/<public_id>')
+@app.route('/user/<username>/a/<public_id>')
 def answer_permalink(username, public_id):
     """Show a single answer permalinked by its public ID."""
     user = User.query.filter_by(username=username).first_or_404()
@@ -183,7 +183,7 @@ def logout():
     flash('You have been logged out!', 'success')
     return redirect(url_for('home'))
 
-@app.route('/profile/<username>', methods=['GET', 'POST'])
+@app.route('/user/<username>', methods=['GET', 'POST'])
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     question_form = QuestionForm()
@@ -226,6 +226,14 @@ def profile(username):
             return redirect(url_for('profile', username=username))
     answers = Answer.query.filter_by(author_id=user.id).order_by(Answer.created_at.desc()).all()
     return render_template('profile.html', user=user, question_form=question_form, answer_form=answer_form, answers=answers)
+
+@app.route('/profile/<username>')
+def legacy_profile(username):
+    return redirect(url_for('profile', username=username), code=301)
+
+@app.route('/profile/<username>/a/<public_id>')
+def legacy_answer_permalink(username, public_id):
+    return redirect(url_for('answer_permalink', username=username, public_id=public_id), code=301)
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
