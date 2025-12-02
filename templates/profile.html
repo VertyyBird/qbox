@@ -34,34 +34,41 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             {% endif %}
         </div>
         <h2>Submit a Question</h2>
-        <form method="POST" action="{{ url_for('profile', username=user.username) }}">
-            {{ question_form.hidden_tag() }}
-            <div>
-                {{ question_form.question_text.label }}<br>
-                {{ question_form.question_text(rows=4, cols=50) }}<br>
-                {% for error in question_form.question_text.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </div>
-            <div>
-                {% if not current_user.is_authenticated %}
-                    {{ question_form.anonymous(checked=True, disabled=True) }} {{ question_form.anonymous.label }}
-                {% else %}
-                    {{ question_form.anonymous() }} {{ question_form.anonymous.label }}
-                {% endif %}
-            </div>
-            <div>
-                {{ question_form.submit() }}
-            </div>
-        </form>
+        <div class="card">
+            <form method="POST" action="{{ url_for('profile', username=user.username) }}">
+                {{ question_form.hidden_tag() }}
+                <div class="form-group">
+                    {{ question_form.question_text.label }}
+                    {{ question_form.question_text(rows=4, cols=50, class_="form-control") }}
+                    {% for error in question_form.question_text.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {% if not current_user.is_authenticated %}
+                        {{ question_form.anonymous(checked=True, disabled=True) }} {{ question_form.anonymous.label }}
+                    {% else %}
+                        {{ question_form.anonymous() }} {{ question_form.anonymous.label }}
+                    {% endif %}
+                </div>
+                <div class="form-actions">
+                    {{ question_form.submit() }}
+                </div>
+            </form>
+        </div>
         <h2>Answered Questions</h2>
-        <ul>
+        <ul class="card-list">
             {% for answer in answers %}
-                <li>
-                    <strong>Question:</strong> {{ answer.question.question_text|nl2br }}<br>
-                    <strong>Answer:</strong> {{ answer.answer_text|nl2br }}<br>
-                    Answered: {{ answer.created_at|time_since }} -
-                    <a href="{{ url_for('answer_permalink', username=user.username, public_id=answer.public_id) }}">Permalink</a>
+                <li class="card">
+                    <div class="card-header">
+                        <div><strong>Answered Question</strong></div>
+                        <div class="card-meta">
+                            Answered: {{ answer.created_at|time_since }} -
+                            <a href="{{ url_for('answer_permalink', username=user.username, public_id=answer.public_id) }}">Permalink</a>
+                        </div>
+                    </div>
+                    <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
+                    <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
                 </li>
             {% endfor %}
         </ul>

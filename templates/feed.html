@@ -23,14 +23,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 {% block og_type %}website{% endblock %}
 {% block content %}
     <h2>Recently Answered Questions</h2>
-    <ul>
+    <ul class="card-list">
         {% for answer in answers.items %}
-            <li>
-                <strong>Question:</strong> {{ answer.question.question_text|nl2br }}<br>
-                <strong>Answer:</strong> {{ answer.answer_text|nl2br }}<br>
-                Answered by <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a>
-                - {{ answer.created_at|time_since }} -
-                <a href="{{ url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id) }}">Permalink</a>
+            <li class="card">
+                <div class="card-header">
+                    <div><strong>Answered by</strong> <a href="{{ url_for('profile', username=answer.author.username) }}">{{ answer.author.username }}</a></div>
+                    <div class="card-meta">
+                        {{ answer.created_at|time_since }} -
+                        <a href="{{ url_for('answer_permalink', username=answer.author.username, public_id=answer.public_id) }}">Permalink</a>
+                    </div>
+                </div>
+                <p><strong>Question:</strong> {{ answer.question.question_text|nl2br }}</p>
+                <p><strong>Answer:</strong> {{ answer.answer_text|nl2br }}</p>
             </li>
         {% endfor %}
     </ul>
