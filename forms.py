@@ -206,7 +206,8 @@ class ModerateQuestionForm(FlaskForm):
 
 class AnswerReportForm(FlaskForm):
     answer_id = HiddenField(validators=[DataRequired()])
-    reason = TextAreaField('Reason')
+    reason_choice = StringField('Reason', validators=[DataRequired()])
+    reason_text = TextAreaField('Details')
     submit = SubmitField('Report')
 
 

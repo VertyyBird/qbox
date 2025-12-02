@@ -168,7 +168,7 @@ def report_answer(answer_id):
         answer_id=answer.id,
         reporter_user_id=current_user.id if current_user.is_authenticated else None,
         reporter_ip=reporter_ip,
-        reason=form.reason.data,
+        reason=form.reason_text.data or form.reason_choice.data,
     )
     db.session.add(report)
     db.session.commit()

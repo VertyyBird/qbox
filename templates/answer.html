@@ -39,8 +39,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             {{ report_form.csrf_token }}
             <input type="hidden" name="answer_id" value="{{ answer.id }}">
             <div class="form-group">
-                <label for="reason">Report reason (optional)</label>
-                <textarea name="reason" rows="2" class="form-control"></textarea>
+                <label>Report reason</label>
+                <select name="reason_choice" class="form-control">
+                    <option value="spam">Spam</option>
+                    <option value="abuse">Abusive/harassment</option>
+                    <option value="inappropriate">Inappropriate content</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reason_text">Details (optional)</label>
+                <textarea name="reason_text" rows="2" class="form-control"></textarea>
             </div>
             <div class="form-actions">
                 <button type="submit">Report Answer</button>

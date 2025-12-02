@@ -62,10 +62,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
                     <div class="card-meta">{{ report.created_at|time_since }}</div>
                 </div>
                 <p>{{ report.reason or 'No reason provided.' }}</p>
-                <form method="POST" action="{{ url_for('resolve_report', report_id=report.id) }}">
-                    {{ block_form.csrf_token }}
-                    <button type="submit">Mark Resolved</button>
-                </form>
+                <div style="display:flex; gap:8px; flex-wrap: wrap;">
+                    <form method="POST" action="{{ url_for('resolve_report', report_id=report.id) }}">
+                        {{ block_form.csrf_token }}
+                        <button type="submit">Ignore / Resolve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('create_block') }}">
+                        {{ block_form.csrf_token }}
+                        <input type="hidden" name="user_id" value="{{ report.answer.author.id }}">
+                        <input type="hidden" name="reason" value="Blocked after reported answer">
+                        <input type="hidden" name="hours" value="">
+                        <button type="submit">Block Author</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('deactivate_block', block_id=report.answer.author.id) }}" onsubmit="return false;">
+                        <!-- placeholder; deactivation handled in block list -->
+                    </form>
+                    <form method="POST" action="{{ url_for('moderate_question', question_id=report.answer.question.id) }}">
+                        {{ block_form.csrf_token }}
+                        <input type="hidden" name="question_id" value="{{ report.answer.question.id }}">
+                        <input type="hidden" name="action" value="hide">
+                        <button type="submit">Hide Question</button>
+                    </form>
+                </div>
             </li>
         {% else %}
             <li class="card"><p>No open reports.</p></li>
