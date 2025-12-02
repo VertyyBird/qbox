@@ -33,6 +33,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 <body>
     {% include 'header.html' %}
     <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="flash {{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         {% block content %}{% endblock content %}
     </main>
     {% include 'footer.html' %}
