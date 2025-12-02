@@ -14,15 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from urllib.parse import urlparse
-from urllib.request import Request, build_opener, URLError
-from urllib.error import HTTPError
-from models import User
-from flask_login import current_user
+import struct
 from pathlib import Path
+from urllib.error import HTTPError
+from urllib.parse import urlparse
+from urllib.request import Request, URLError, build_opener
+
+from flask_login import current_user
+from flask_wtf import FlaskForm
+from wtforms import BooleanField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+
+from models import User
 
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
@@ -35,6 +38,9 @@ def _load_allowed_hosts():
 
 ALLOWED_AVATAR_HOSTS = _load_allowed_hosts()
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+AVATAR_RENDER_SIZE_PX = 100
+MAX_AVATAR_DIMENSION = AVATAR_RENDER_SIZE_PX * 3
+IMAGE_PROBE_MAX_BYTES = 65536
 
 
 def _url_is_accessible(url: str) -> bool:
@@ -60,6 +66,52 @@ def _url_is_accessible(url: str) -> bool:
             return False
 
     return _try_request("HEAD")
+
+
+def _probe_image_size(data: bytes):
+    """Return (width, height) for basic image types using only header bytes."""
+    if data.startswith(b"\x89PNG\r\n\x1a\n") and len(data) >= 24:
+        return struct.unpack(">II", data[16:24])
+    if data[:6] in (b"GIF87a", b"GIF89a") and len(data) >= 10:
+        return struct.unpack("<HH", data[6:10])
+    if data.startswith(b"\xff\xd8"):
+        idx = 2
+        data_len = len(data)
+        while idx + 9 <= data_len:
+            if data[idx] != 0xFF:
+                break
+            marker = data[idx + 1]
+            if marker == 0xDA:  # Start of scan
+                break
+            if data_len < idx + 4:
+                break
+            seg_length = struct.unpack(">H", data[idx + 2:idx + 4])[0]
+            if marker in {0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF}:
+                if idx + 5 + 4 <= data_len:
+                    height, width = struct.unpack(">HH", data[idx + 5:idx + 9])
+                    return width, height
+                break
+            idx += 2 + seg_length
+    return None
+
+
+def _fetch_image_size(url: str):
+    """Fetch the remote image (limited bytes) and return (w, h) if detectable."""
+    req = Request(url, method="GET")
+    try:
+        with build_opener().open(req, timeout=5) as resp:
+            data = resp.read(IMAGE_PROBE_MAX_BYTES)
+            return _probe_image_size(data)
+    except Exception:
+        return None
+
+
+def _image_within_render_bounds(url: str, max_dimension: int = MAX_AVATAR_DIMENSION) -> bool:
+    size = _fetch_image_size(url)
+    if not size:
+        return False
+    width, height = size
+    return width <= max_dimension and height <= max_dimension
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -91,6 +143,10 @@ class RegistrationForm(FlaskForm):
                 raise ValidationError('Avatar URL must end with an image file extension.')
             if not _url_is_accessible(avatar_url.data):
                 raise ValidationError('Avatar URL is not accessible or redirects.')
+            if not _image_within_render_bounds(avatar_url.data):
+                raise ValidationError(f'Avatar image must be at most {MAX_AVATAR_DIMENSION}x{MAX_AVATAR_DIMENSION} pixels.')
+            if not _image_within_render_bounds(avatar_url.data):
+                raise ValidationError(f'Avatar image must be at most {MAX_AVATAR_DIMENSION}x{MAX_AVATAR_DIMENSION} pixels.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])

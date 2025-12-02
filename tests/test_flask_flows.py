@@ -128,6 +128,7 @@ def test_update_account_info(client, monkeypatch):
 
     # Ensure avatar URL check passes during this test
     monkeypatch.setattr("forms._url_is_accessible", lambda url: True)
+    monkeypatch.setattr("forms._fetch_image_size", lambda url: (100, 100))
 
     bio_text = "Hello there"
     avatar = "https://avatars.githubusercontent.com/u/1.png"

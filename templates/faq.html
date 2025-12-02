@@ -31,7 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <div class="card-header">
             <div><strong>How do questions and anonymity work?</strong></div>
         </div>
-        <p>You can post questions on someone’s profile whether you are logged in or not. Logged-out visitors ask anonymously by default; logged-in users can toggle anonymity before submitting.</p>
+        <p>You can submit questions on someone’s profile whether you are logged in or not. Logged-out visitors can only ask anonymously, logged-in users can toggle anonymity before submitting.</p>
     </div>
 
     <div class="card" id="unanswered">
@@ -39,7 +39,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <div><strong>Where do I find new questions?</strong></div>
         </div>
         <p>Your Dashboard shows unanswered questions sent to you. The header also shows a count of pending questions. Answering from the dashboard immediately publishes your response to your profile and the public feed.</p>
+        <p>Other users need to submit questions to you. Qbox does not send automated questions to your dashboard.</p>
     </div>
+
+    <div class="card" id="private">
+        <div class="card-header">
+            <div><strong>Can I make my answers private?</strong></div>
+        </div>
+        <p>No. All answers are accessible by the public at all times. If you do not wish for your answer or question to be seen by everyone, do not submit that to the site.</p>
+    </div>
+
 
     <div class="card" id="permalinks">
         <div class="card-header">
@@ -57,8 +66,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
             <li>Host must be on the allowlist: <code>ibb.co</code>, <code>i.ibb.co</code>, <code>github.com</code>, <code>raw.githubusercontent.com</code>, <code>avatars.githubusercontent.com</code>, <code>user-images.githubusercontent.com</code>.</li>
             <li>File extension must end with <code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.gif</code>, or <code>.webp</code>.</li>
             <li>The URL must be accessible and respond with a successful status (we check with a quick HEAD/GET request and follow a single redirect).</li>
+            <li>Images must be no larger than 300x300px (3x the rendered size) so pages stay fast.</li>
         </ul>
-        <p>If your link fails validation, double-check the host and that it points directly to an image file.</p>
+        <p>If your link fails validation, double-check the host and that it points directly to an image file. The best way to be successful is to right click on the image you want to use and then click on "copy image URL"</p>
     </div>
 </div>
 {% endblock %}
